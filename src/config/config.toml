@@ -1,0 +1,30 @@
+title = "Alpaca LNA Drivers"
+
+[General]
+name = 'LNA Focus160'
+version = '0.1.0'
+description = 'Interface for Perkin-Elmer Focuser'
+
+[Device]
+deviceType = 'Focuser'
+deviceID = '3285e9af-8d1d-4f9d-b368-d129d8e9a24b' # https://guidgenerator.com/online-guid-generator.aspx
+absolute = true
+max_step = 20000
+temp_comp = false
+motor_ip = '192.168.50.182'
+motor_port = 5001
+
+[Network]
+ip_address = '192.168.50.226'
+port_pub = 7001
+port_pull = 7005
+port_rep = 7002
+
+[Database]
+db_name = 'db_name'
+db_user = 'username'
+db_password = 'password'
+
+[Logging]
+log_level = 'INFO'
+log_file = '/logs/focuser.log'
