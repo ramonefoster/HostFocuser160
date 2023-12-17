@@ -7,6 +7,7 @@
 
 from logging import Logger
 
+from threading import Thread
 from threading import Lock
 from threading import Timer
 import time
@@ -81,13 +82,16 @@ class App():
                 msg_pull = self.puller.recv().decode()
                 try:
                     self.device.move(int(msg_pull))
+                    self.logger.debug(f'[Moving] Moving to {msg_pull} position')
                 except Exception as e:
                     self.logger.error(f'Error Moving: {e}')
 
             # Req/Reply can be used both as cmd receiver and status
             elif socks.get(self.replier) == zmq.POLLIN:
                 msg_pull = self.replier.recv().decode()
+                self.logger.debug(f'[Status] Requested: {msg_pull}')
                 self.replier.send(self.status.encode())
+                self.logger.debug(f'[Status] Sent: {self.status}')
 
             # Retrieve current values
             current_is_mov = self.device.is_moving

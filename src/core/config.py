@@ -9,7 +9,7 @@ import sys
 import toml
 
 _dict = {}
-_dict = toml.load(r'/home/ramones/Documents/HostControllerF160/src/config/config.toml')
+_dict = toml.load(r'/src/config/config.toml')
 def get_toml(sect: str, item: str):
     if not _dict is {}:
         return _dict[sect][item]
@@ -28,8 +28,8 @@ class Config:
     # --------------
     # Device Section
     # --------------
-    motor_ip: str = get_toml('Device', 'motor_ip')
-    motor_port: int = get_toml('Device', 'motor_port')
+    device_ip: str = get_toml('Device', 'device_port')
+    device_port: int = get_toml('Device', 'device_port')
     absolute: bool = get_toml('Device', 'absolute')
     max_step: int = get_toml('Device', 'max_step')
     temp_comp: bool = get_toml('Device', 'temp_comp')

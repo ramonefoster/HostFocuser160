@@ -11,8 +11,8 @@ deviceID = '3285e9af-8d1d-4f9d-b368-d129d8e9a24b' # https://guidgenerator.com/on
 absolute = true
 max_step = 20000
 temp_comp = false
-motor_ip = '192.168.50.182'
-motor_port = 5001
+device_ip = '192.168.50.182'
+device_port = 5001
 
 [Network]
 ip_address = '192.168.50.226'
