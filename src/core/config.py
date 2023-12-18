@@ -9,7 +9,7 @@ import sys
 import toml
 
 _dict = {}
-_dict = toml.load(r'/src/config/config.toml')
+_dict = toml.load(r'src/config/config.toml')
 def get_toml(sect: str, item: str):
     if not _dict is {}:
         return _dict[sect][item]
@@ -38,3 +38,6 @@ class Config:
     # ---------------
     log_level: str = get_toml('Logging', 'log_level')
     log_file: str = get_toml('Logging', 'log_file')
+    log_to_stdout: bool = get_toml('Logging', 'log_to_stdout')
+    log_max_size_mb: int = get_toml('Logging', 'log_max_size_mb')
+    log_num_keep: int = get_toml('Logging', 'log_num_keep')

@@ -1,0 +1,97 @@
+2023-12-18T18:53:32.321 INFO Server Started
+2023-12-18T18:53:40.582 INFO Moving to 5000 position
+2023-12-18T18:53:40.701 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-18T18:53:40.701 INFO Position published: 26
+2023-12-18T18:53:41.022 INFO Position published: 310
+2023-12-18T18:53:41.342 INFO Position published: 708
+2023-12-18T18:53:41.664 INFO Position published: 1105
+2023-12-18T18:53:41.986 INFO Position published: 1478
+2023-12-18T18:53:42.307 INFO Position published: 1596
+2023-12-18T18:53:42.628 INFO Status published: {'is_moving': False, 'position': 1596, 'error': '', 'connected': True}
+2023-12-18T18:54:11.680 INFO Moving to 0 position
+2023-12-18T18:54:11.801 INFO Status published: {'is_moving': True, 'position': 1596, 'error': '', 'connected': True}
+2023-12-18T18:54:11.802 INFO Position published: 1571
+2023-12-18T18:54:12.123 INFO Position published: 1285
+2023-12-18T18:54:12.443 INFO Position published: 886
+2023-12-18T18:54:12.764 INFO Position published: 490
+2023-12-18T18:54:13.084 INFO Position published: 118
+2023-12-18T18:54:13.403 INFO Position published: -2
+2023-12-18T18:54:13.721 INFO Status published: {'is_moving': False, 'position': -2, 'error': '', 'connected': True}
+2023-12-18T18:54:37.760 INFO Moving to 5353 position
+2023-12-18T18:54:37.879 INFO Status published: {'is_moving': True, 'position': -2, 'error': '', 'connected': True}
+2023-12-18T18:54:37.879 INFO Position published: 25
+2023-12-18T18:54:38.199 INFO Position published: 308
+2023-12-18T18:54:38.519 INFO Position published: 705
+2023-12-18T18:54:38.841 INFO Position published: 1102
+2023-12-18T18:54:39.162 INFO Position published: 1498
+2023-12-18T18:54:39.483 INFO Position published: 1704
+2023-12-18T18:54:39.804 INFO Status published: {'is_moving': False, 'position': 1704, 'error': '', 'connected': True}
+2023-12-18T18:54:39.805 INFO Position published: 1709
+2023-12-18T18:57:35.911 INFO Moving to 0 position
+2023-12-18T18:57:36.032 INFO Status published: {'is_moving': True, 'position': 1709, 'error': '', 'connected': True}
+2023-12-18T18:57:36.032 INFO Position published: 1683
+2023-12-18T18:57:36.353 INFO Position published: 1396
+2023-12-18T18:57:36.673 INFO Position published: 998
+2023-12-18T18:57:36.994 INFO Position published: 602
+2023-12-18T18:57:37.314 INFO Position published: 208
+2023-12-18T18:57:37.632 INFO Position published: 1
+2023-12-18T18:57:37.951 INFO Status published: {'is_moving': False, 'position': 1, 'error': '', 'connected': True}
+2023-12-18T18:57:37.951 INFO Position published: -3
+2023-12-18T18:59:00.094 INFO Server Started
+2023-12-18T18:59:54.309 INFO Server Started
+2023-12-18T19:05:04.567 INFO Server Started
+2023-12-18T19:06:47.252 INFO Moving to 0 position
+2023-12-18T19:06:51.659 INFO Moving to 1200 position
+2023-12-18T19:06:51.778 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-18T19:06:51.778 INFO Position published: 23
+2023-12-18T19:06:52.098 INFO Position published: 279
+2023-12-18T19:06:52.418 INFO Status published: {'is_moving': False, 'position': 279, 'error': '', 'connected': True}
+2023-12-18T19:06:52.418 INFO Position published: 382
+2023-12-18T19:09:35.915 INFO Moving to 5000 position
+2023-12-18T19:09:36.034 INFO Status published: {'is_moving': True, 'position': 382, 'error': '', 'connected': True}
+2023-12-18T19:09:36.035 INFO Position published: 411
+2023-12-18T19:09:36.355 INFO Position published: 697
+2023-12-18T19:09:36.676 INFO Position published: 1095
+2023-12-18T19:09:36.998 INFO Position published: 1472
+2023-12-18T19:09:37.319 INFO Position published: 1600
+2023-12-18T19:09:37.640 INFO Status published: {'is_moving': False, 'position': 1600, 'error': '', 'connected': True}
+2023-12-18T19:09:44.211 INFO Moving to 0 position
+2023-12-18T19:09:44.331 INFO Status published: {'is_moving': True, 'position': 1600, 'error': '', 'connected': True}
+2023-12-18T19:09:44.332 INFO Position published: 1575
+2023-12-18T19:09:44.653 INFO Position published: 1287
+2023-12-18T19:09:44.973 INFO Position published: 889
+2023-12-18T19:09:45.294 INFO Position published: 491
+2023-12-18T19:09:45.614 INFO Position published: 120
+2023-12-18T19:09:45.932 INFO Position published: 3
+2023-12-18T19:09:46.249 INFO Status published: {'is_moving': False, 'position': 3, 'error': '', 'connected': True}
+2023-12-18T19:10:25.076 INFO Moving to 5000 position
+2023-12-18T19:10:25.195 INFO Status published: {'is_moving': True, 'position': 3, 'error': '', 'connected': True}
+2023-12-18T19:10:25.195 INFO Position published: 31
+2023-12-18T19:10:25.515 INFO Position published: 315
+2023-12-18T19:10:25.835 INFO Position published: 713
+2023-12-18T19:10:26.157 INFO Position published: 1110
+2023-12-18T19:10:26.478 INFO Position published: 1484
+2023-12-18T19:10:26.799 INFO Position published: 1603
+2023-12-18T19:10:27.120 INFO Status published: {'is_moving': False, 'position': 1603, 'error': '', 'connected': True}
+2023-12-18T19:10:31.771 INFO Moving to -5000 position
+2023-12-18T19:10:31.892 INFO Status published: {'is_moving': True, 'position': 1603, 'error': '', 'connected': True}
+2023-12-18T19:10:31.892 INFO Position published: 1579
+2023-12-18T19:10:32.213 INFO Position published: 1292
+2023-12-18T19:10:32.533 INFO Position published: 895
+2023-12-18T19:10:32.853 INFO Position published: 499
+2023-12-18T19:10:33.174 INFO Position published: 102
+2023-12-18T19:10:33.495 INFO Position published: -293
+2023-12-18T19:10:33.816 INFO Position published: -689
+2023-12-18T19:10:34.139 INFO Position published: -1087
+2023-12-18T19:10:34.461 INFO Position published: -1465
+2023-12-18T19:10:34.783 INFO Position published: -1592
+2023-12-18T19:10:35.105 INFO Status published: {'is_moving': False, 'position': -1592, 'error': '', 'connected': True}
+2023-12-18T19:13:00.475 INFO Moving to 0 position
+2023-12-18T19:13:00.597 INFO Status published: {'is_moving': True, 'position': -1592, 'error': '', 'connected': True}
+2023-12-18T19:13:00.597 INFO Position published: -1563
+2023-12-18T19:13:00.920 INFO Position published: -1275
+2023-12-18T19:13:01.241 INFO Position published: -875
+2023-12-18T19:13:01.562 INFO Position published: -477
+2023-12-18T19:13:01.883 INFO Position published: -106
+2023-12-18T19:13:02.201 INFO Position published: 9
+2023-12-18T19:13:02.519 INFO Status published: {'is_moving': False, 'position': 9, 'error': '', 'connected': True}

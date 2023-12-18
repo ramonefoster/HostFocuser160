@@ -15,10 +15,10 @@ device_ip = '192.168.50.182'
 device_port = 5001
 
 [Network]
-ip_address = '192.168.50.226'
+ip_address = '127.0.0.1'
 port_pub = 7001
-port_pull = 7005
-port_rep = 7002
+port_pull = 7002
+port_rep = 7003
 
 [Database]
 db_name = 'db_name'
@@ -27,4 +27,7 @@ db_password = 'password'
 
 [Logging]
 log_level = 'INFO'
-log_file = '/logs/focuser.log'
+log_file = 'logs/focuser.log'
+log_to_stdout = false
+log_max_size_mb = 5
+log_num_keep = 10

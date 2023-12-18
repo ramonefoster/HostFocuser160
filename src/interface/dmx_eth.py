@@ -8,7 +8,7 @@ from src.core.config import Config
 import socket
 import time
 
-class Focuser():
+class FocuserDriver():
     def __init__(self, logger: Logger):  
         self._lock = Lock()
         self.name: str = 'LNA Focuser'
@@ -60,9 +60,9 @@ class Focuser():
             self._lock.release()
             self.disconnect()
         if self._connected:
-            self.logger.info('[connected]')
+            self.logger.info('[Connected]')
         else:
-            self.logger.info('[disconnected]')
+            self.logger.info('[Disconnected]')
     
     def disconnect(self):
         self._lock.acquire()
@@ -154,12 +154,12 @@ class Focuser():
             try:
                 self._lock.acquire()
                 self._position = int(self._write("P\n"))
-                self.logger.debug(f'[position] {str(self._position)}')
+                self.logger.debug(f'[Device] position: {str(self._position)}')
                 self._lock.release()
                 print(f"[position] {self._position}")
                 return self._position
             except ValueError as e:
-                self.logger.error(f'Error reading position: {e}')
+                self.logger.error(f'[Device] Error reading position: {str(e)}')
                 retries += 1  
                 self._lock.release() 
         
@@ -171,7 +171,7 @@ class Focuser():
         # self._is_moving = self._write("R\n")
         res = self._is_moving
         self._lock.release()
-        self.logger.debug(f'[is_moving] {str(res)}')
+        self.logger.debug(f'[Device] is_moving: {str(res)}')
         return res
     
     @property
@@ -179,7 +179,7 @@ class Focuser():
         self._lock.acquire()      
         res = self._absolute
         self._lock.release()
-        self.logger.debug(f'[absolute] {str(res)}')
+        self.logger.debug(f'[Device] absolute: {str(res)}')
         return res
 
     @property
@@ -187,7 +187,7 @@ class Focuser():
         self._lock.acquire()
         res = self._max_increment
         self._lock.release()
-        self.logger.debug(f'[max_increment] {str(res)}')
+        self.logger.debug(f'[Device] max_increment: {str(res)}')
         return res
 
     @property
@@ -195,7 +195,7 @@ class Focuser():
         self._lock.acquire()
         res = self._max_step
         self._lock.release()
-        self.logger.debug(f'[max_step] {str(res)}')
+        self.logger.debug(f'[Device] max_step: {str(res)}')
         return res
 
     @property
@@ -203,14 +203,15 @@ class Focuser():
         self._lock.acquire()
         res = self._step_size
         self._lock.release()
-        self.logger.debug(f'[step_size] {str(res)}')
+        self.logger.debug(f'[Device] step_size: {str(res)}')
         return res
     
     def initialize(self):
-        resp = self._write(f"HOME\n")
+        res = self._write(f"HOME\n")
+        self.logger.debug(f'[Device] home: {str(res)}')
 
     def move(self, position: int):
-        self.logger.debug(f'[Move] pos={str(position)}')
+        self.logger.debug(f'[Device] move={str(position)}')
         self._lock.acquire()        
         if self._is_moving:
             self._lock.release()
@@ -234,7 +235,6 @@ class Focuser():
 
     def stop(self) -> None:
         self._lock.acquire()
-        self.logger.debug('[Stop]')
         print('[stop] Stopping...')
         self._stopped = True
         self._is_moving = False
@@ -244,18 +244,17 @@ class Focuser():
         self._lock.release()      
     
     def Halt(self) -> None:
-        self.logger.debug('[Halt]')
+        self.logger.debug('[Device] halt')
         self._write(f"S\n")
         self.stop()        
     
     def _write(self, cmd):
         if self._connected:
             try:    
-                self._client_socket.send(bytes(cmd, 'utf-8'))
-                ack = self._serial.readline().decode('utf-8').rstrip()                            
-                return ack
+                sent_bytes = self._client_socket.send(bytes(cmd, 'utf-8'))
+                return sent_bytes
             except Exception as e:
-                self.logger.error(f"{str(e)}")
+                self.logger.error(f"[Device] Error writing to device: {str(e)}")
                 print("Error writing COM: "+ str(e))
                 return "Error"
         else:
