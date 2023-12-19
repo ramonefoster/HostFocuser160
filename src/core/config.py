@@ -19,6 +19,10 @@ def get_toml(sect: str, item: str):
 class Config:
     """Device configuration in ``config.toml``"""
     # ---------------
+    # General Section
+    # ---------------
+    startup: str = get_toml('General', 'startup')
+    # ---------------
     # Network Section
     # ---------------
     ip_address: str = get_toml('Network', 'ip_address')

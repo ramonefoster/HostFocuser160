@@ -1,9 +1,10 @@
-title = "Alpaca LNA Drivers"
+title = "Focuser160MQ"
 
 [General]
 name = 'LNA Focus160'
 version = '0.1.0'
 description = 'Interface for Perkin-Elmer Focuser'
+startup = true
 
 [Device]
 deviceType = 'Focuser'

@@ -5,10 +5,170 @@
 #
 # Python Compatibility: Requires Python 3.10 or later
 
+from PyQt5 import QtWidgets, uic, QtTest
+from PyQt5.QtCore import QTimer, QUrl, QThreadPool, pyqtSlot, Qt
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QInputDialog
+from PyQt5 import QtGui
+
+import sys
+from threading import Thread
+
 from src.core.app import App
 from src.core.log import init_logging
+from src.core.config import Config
+
+Ui_MainWindow, QtBaseClass = uic.loadUiType('assets/main.ui')
+
+class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        QtWidgets.QMainWindow.__init__(self)
+        Ui_MainWindow.__init__(self)
+        self.setupUi(self)
+
+        main_window_geometry = self.geometry()  # Get the geometry of the main window
+
+        # Calculate the coordinates for the right side of the main window
+        dock_x = main_window_geometry.x() + main_window_geometry.width() + 100  # Adjust for spacing
+        dock_y = main_window_geometry.y()
+
+        self.control = App(logger)
+        self.lblIP.setText(f"IP: {self.control.ip_address}")
+        self.lblPort.setText(f"{self.control.port_pub}, {self.control.port_pull}, {self.control.port_rep}")
+
+        # LOG FILE
+        self.log_text_edit = QtWidgets.QTextEdit()  # Widget to display log
+        self.log_dock_widget = QtWidgets.QDockWidget("Log", self)
+        self.log_dock_widget.setWidget(self.log_text_edit)
+        self.boxLog.stateChanged.connect(self.toggle_log_view)     
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
+        self.log_dock_widget.setMinimumSize(600, 500)   
+        self.log_dock_widget.setFloating(True)
+        self.log_dock_widget.move(dock_x, dock_y)  
+        self.log_dock_widget.hide()  # Hide log view by default  
+
+        # Create the QTextEdit and QPushButton
+        self.conf_text_edit = QtWidgets.QTextEdit()
+        self.save_button = QtWidgets.QPushButton("Save")
+        self.save_button.clicked.connect(self.save_config_file)
+        # Create a widget to hold the QTextEdit and the "Save" button
+        widget_inside_dock = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.conf_text_edit)
+        layout.addWidget(self.save_button)
+        widget_inside_dock.setLayout(layout)
+        # Create the QDockWidget and set its content
+        self.conf_dock_widget = QtWidgets.QDockWidget("Config", self)
+        self.conf_dock_widget.setWidget(widget_inside_dock)
+        self.conf_dock_widget.move(dock_x, dock_y)        
+        # Add the QDockWidget to the main window and hide it initially
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.conf_dock_widget)
+        self.conf_dock_widget.hide()    
+        self.conf_dock_widget.setMinimumSize(400, 500)   
+        self.conf_dock_widget.setFloating(True)
+
+        # Buttons
+        self.btnStart.clicked.connect(self.start)
+        self.btnStop.clicked.connect(self.stop)  
+        self.actionSettings.triggered.connect(self.toggle_config_view)
+
+        self.update_timer = QTimer(self)
+        self.update_timer.timeout.connect(self.update)
+        self.update_timer.start(100)
+
+        self.run_thread = None
+        self.statusBar().showMessage("Ready")
+
+        if Config.startup:
+            self.start()
+    
+    def start(self):
+        self.run_thread = Thread(target = self.control.run)
+        self.run_thread.start()
+        # self.run_thread.daemon = True
+    
+    def stop(self):
+        self.control.disconnect()
+        if self.run_thread and self.run_thread.is_alive():
+            self.run_thread.join()
+    
+    def toggle_config_view(self):
+        file_name = 'src/config/config.toml'
+        if file_name:
+            self.read_config_file(file_name)
+            self.conf_dock_widget.show()
+
+    def read_config_file(self, file_path):
+        with open(file_path, "r") as file:
+            log_content = file.read()
+            self.conf_text_edit.setPlainText(log_content)
+    
+    def save_config_file(self):
+        file_name = 'src/config/config.toml'
+        content_to_save = self.conf_text_edit.toPlainText()
+
+        if file_name:
+            with open(file_name, "w") as file:
+                file.write(content_to_save)
+
+    def toggle_log_view(self, state):
+        if state == Qt.Checked:
+            file_name = 'logs/focuser.log'
+            if file_name:
+                self.read_log_file(file_name)
+                self.log_dock_widget.show()
+        else:
+            self.log_dock_widget.hide()
+
+    def read_log_file(self, file_path):
+        with open(file_path, "r") as file:
+            log_content = file.read()
+            self.log_text_edit.setPlainText(log_content)
+        
+        self.update_log_timer = QTimer(self)
+        self.update_log_timer.timeout.connect(lambda: self.read_log_file(file_path))
+        self.update_log_timer.start(20000)
+    
+    def update(self):        
+        status = self.control.status
+        con = status["connected"]
+        if self.run_thread and self.run_thread.is_alive():
+            self.statusBar().setStyleSheet("background-color: green")
+        else:
+            self.statusBar().setStyleSheet("background-color: indianred")
+        if con:
+            self.statusBar().showMessage("Device Connected")
+        else:
+            self.statusBar().showMessage("Device Disconnected")
+        self.lblPos.setText(str(status["position"]))
+        if len(status["error"]) > 1:
+            self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")
+        else:
+            self.lblErr.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
+        if status["is_moving"]:
+            self.lblMov.setStyleSheet("background-color: green; border-radius: 10px;")
+        else:
+            self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
+    
+    def closeEvent(self, event):
+        """Close application"""
+        close = QMessageBox()
+        close.setText("Deseja sair?")
+        close.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        close = close.exec()
+
+        if close == QMessageBox.Yes:   
+            self.stop()  
+            event.accept()
 
 if __name__ == "__main__":
     logger = init_logging()
-    app = App(logger)
-    app.run()
+    main_app = QtWidgets.QApplication(sys.argv)
+    window = FocuserOPD()
+    
+    window.show()
+    sys.exit(main_app.exec_())
+
+    
+    
+    

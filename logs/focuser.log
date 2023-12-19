@@ -95,3 +95,292 @@
 2023-12-18T19:13:01.883 INFO Position published: -106
 2023-12-18T19:13:02.201 INFO Position published: 9
 2023-12-18T19:13:02.519 INFO Status published: {'is_moving': False, 'position': 9, 'error': '', 'connected': True}
+2023-12-19T12:22:40.168 INFO Server Started
+2023-12-19T12:23:50.396 ERROR Error Moving: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2023-12-19T12:24:52.088 INFO Server Started
+2023-12-19T12:24:58.136 ERROR Error Moving: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+2023-12-19T12:34:13.792 INFO Server Started
+2023-12-19T12:40:56.568 INFO Server Started
+2023-12-19T12:41:08.066 INFO Moving to 6000 position
+2023-12-19T12:41:08.185 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T12:41:08.185 INFO Position published: 30
+2023-12-19T12:41:08.455 INFO Position published: 254
+2023-12-19T12:41:08.726 INFO Position published: 590
+2023-12-19T12:41:08.996 INFO Position published: 924
+2023-12-19T12:41:09.311 INFO Position published: 1311
+2023-12-19T12:41:09.583 INFO Position published: 1647
+2023-12-19T12:41:09.854 INFO Position published: 1887
+2023-12-19T12:41:10.125 INFO Status published: {'is_moving': False, 'position': 1887, 'error': '', 'connected': True}
+2023-12-19T12:41:10.125 INFO Position published: 1927
+2023-12-19T12:41:16.868 INFO Moving to 0 position
+2023-12-19T12:41:16.989 INFO Status published: {'is_moving': True, 'position': 1927, 'error': '', 'connected': True}
+2023-12-19T12:41:16.989 INFO Position published: 1901
+2023-12-19T12:41:17.260 INFO Position published: 1676
+2023-12-19T12:41:17.532 INFO Position published: 1340
+2023-12-19T12:41:17.803 INFO Position published: 1004
+2023-12-19T12:41:18.074 INFO Position published: 669
+2023-12-19T12:41:18.344 INFO Position published: 336
+2023-12-19T12:41:18.613 INFO Position published: 66
+2023-12-19T12:41:18.881 INFO Status published: {'is_moving': False, 'position': 66, 'error': '', 'connected': True}
+2023-12-19T12:41:18.881 INFO Position published: 8
+2023-12-19T13:18:04.410 INFO Server Started
+2023-12-19T13:18:33.469 INFO Server Started
+2023-12-19T13:18:53.891 INFO Server Started
+2023-12-19T13:22:25.891 INFO Server Started
+2023-12-19T13:23:08.758 INFO Server Started
+2023-12-19T13:46:06.514 INFO Server Started
+2023-12-19T13:46:14.945 INFO Server Started
+2023-12-19T13:46:35.546 INFO Server Started
+2023-12-19T13:50:12.165 INFO Server Started
+2023-12-19T14:24:24.914 INFO Server Started
+2023-12-19T14:25:04.445 INFO Server Started
+2023-12-19T14:26:53.360 INFO Server Started
+2023-12-19T14:27:28.753 INFO Server Started
+2023-12-19T14:27:47.393 INFO Server Started
+2023-12-19T14:28:08.727 INFO Moving to 1500 position
+2023-12-19T14:28:08.846 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T14:28:08.846 INFO Position published: 28
+2023-12-19T14:28:09.117 INFO Position published: 251
+2023-12-19T14:28:09.387 INFO Position published: 462
+2023-12-19T14:28:09.657 INFO Status published: {'is_moving': False, 'position': 462, 'error': '', 'connected': True}
+2023-12-19T14:28:09.657 INFO Position published: 479
+2023-12-19T14:51:32.791 INFO Server Started
+2023-12-19T14:53:10.008 INFO Server Started
+2023-12-19T14:53:39.093 INFO Server Started
+2023-12-19T14:54:32.904 INFO Moving to 10000 position
+2023-12-19T14:54:33.022 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T14:54:33.023 INFO Position published: 24
+2023-12-19T14:54:33.293 INFO Position published: 247
+2023-12-19T14:54:33.563 INFO Position published: 582
+2023-12-19T14:54:33.833 INFO Position published: 916
+2023-12-19T14:54:34.149 INFO Position published: 1303
+2023-12-19T14:54:34.420 INFO Position published: 1638
+2023-12-19T14:54:34.691 INFO Position published: 1974
+2023-12-19T14:54:34.962 INFO Position published: 2310
+2023-12-19T14:54:35.273 INFO Position published: 2691
+2023-12-19T14:54:35.543 INFO Position published: 3020
+2023-12-19T14:54:35.815 INFO Position published: 3187
+2023-12-19T14:54:36.086 INFO Status published: {'is_moving': False, 'position': 3187, 'error': '', 'connected': True}
+2023-12-19T14:54:36.086 INFO Position published: 3194
+2023-12-19T14:55:36.856 INFO Server Started
+2023-12-19T14:56:03.600 INFO Server Started
+2023-12-19T15:53:30.619 INFO Server Started
+2023-12-19T15:53:39.072 INFO Moving to 10000 position
+2023-12-19T15:53:39.190 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T15:53:39.190 INFO Position published: 26
+2023-12-19T15:53:39.460 INFO Position published: 249
+2023-12-19T15:53:39.731 INFO Position published: 585
+2023-12-19T15:53:40.001 INFO Position published: 920
+2023-12-19T15:53:40.317 INFO Position published: 1308
+2023-12-19T15:53:40.588 INFO Position published: 1643
+2023-12-19T15:53:40.859 INFO Position published: 1978
+2023-12-19T15:53:41.131 INFO Position published: 2314
+2023-12-19T15:53:41.441 INFO Position published: 2695
+2023-12-19T15:53:41.712 INFO Position published: 3023
+2023-12-19T15:53:41.984 INFO Position published: 3193
+2023-12-19T15:53:42.255 INFO Status published: {'is_moving': False, 'position': 3193, 'error': '', 'connected': True}
+2023-12-19T15:53:42.255 INFO Position published: 3207
+2023-12-19T15:53:50.428 INFO Disconnecting Replier
+2023-12-19T15:53:50.428 INFO Disconnecting Publisher
+2023-12-19T15:53:50.428 INFO Disconnecting Pull
+2023-12-19T15:53:50.428 INFO Server Disconnecting
+2023-12-19T15:55:54.644 INFO Server Started
+2023-12-19T15:56:21.571 INFO Moving to 10000 position
+2023-12-19T15:56:21.690 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T15:56:21.690 INFO Position published: 25
+2023-12-19T15:56:21.960 INFO Position published: 247
+2023-12-19T15:56:22.230 INFO Position published: 583
+2023-12-19T15:56:22.500 INFO Position published: 917
+2023-12-19T15:56:22.816 INFO Position published: 1304
+2023-12-19T15:56:23.087 INFO Position published: 1640
+2023-12-19T15:56:23.359 INFO Position published: 1976
+2023-12-19T15:56:23.630 INFO Position published: 2311
+2023-12-19T15:56:23.940 INFO Position published: 2693
+2023-12-19T15:56:24.212 INFO Position published: 3022
+2023-12-19T15:56:24.483 INFO Position published: 3193
+2023-12-19T15:56:24.754 INFO Status published: {'is_moving': False, 'position': 3193, 'error': '', 'connected': True}
+2023-12-19T15:56:24.754 INFO Position published: 3202
+2023-12-19T15:56:31.941 INFO Moving to 0 position
+2023-12-19T15:56:32.062 INFO Status published: {'is_moving': True, 'position': 3202, 'error': '', 'connected': True}
+2023-12-19T15:56:32.062 INFO Position published: 3175
+2023-12-19T15:56:32.333 INFO Position published: 2952
+2023-12-19T15:56:32.604 INFO Position published: 2616
+2023-12-19T15:56:32.876 INFO Position published: 2281
+2023-12-19T15:56:33.147 INFO Position published: 1945
+2023-12-19T15:56:33.418 INFO Position published: 1611
+2023-12-19T15:56:33.690 INFO Position published: 1275
+2023-12-19T15:56:33.960 INFO Position published: 940
+2023-12-19T15:56:34.230 INFO Position published: 607
+2023-12-19T15:56:34.500 INFO Position published: 273
+2023-12-19T15:56:34.769 INFO Position published: 39
+2023-12-19T15:56:35.036 INFO Status published: {'is_moving': False, 'position': 39, 'error': '', 'connected': True}
+2023-12-19T15:56:35.036 INFO Position published: 3
+2023-12-19T15:56:42.648 INFO Disconnecting Replier
+2023-12-19T15:56:42.649 INFO Disconnecting Publisher
+2023-12-19T15:56:42.649 INFO Disconnecting Pull
+2023-12-19T15:56:42.649 INFO Server Disconnecting
+2023-12-19T15:56:51.305 INFO Disconnecting Replier
+2023-12-19T15:56:51.305 INFO Disconnecting Publisher
+2023-12-19T15:56:51.305 INFO Disconnecting Pull
+2023-12-19T15:56:51.305 INFO Server Disconnecting
+2023-12-19T16:11:28.403 INFO Server Started
+2023-12-19T16:11:32.915 INFO Disconnecting Replier
+2023-12-19T16:11:32.916 INFO Disconnecting Publisher
+2023-12-19T16:11:32.916 INFO Disconnecting Pull
+2023-12-19T16:11:32.916 INFO Server Disconnecting
+2023-12-19T16:12:22.068 INFO Server Started
+2023-12-19T16:12:31.019 INFO Disconnecting Replier
+2023-12-19T16:12:31.019 INFO Disconnecting Publisher
+2023-12-19T16:12:31.019 INFO Disconnecting Pull
+2023-12-19T16:12:31.019 INFO Server Disconnecting
+2023-12-19T16:16:07.423 INFO Server Started
+2023-12-19T16:16:15.888 INFO Disconnecting Replier
+2023-12-19T16:16:15.888 INFO Disconnecting Publisher
+2023-12-19T16:16:15.888 INFO Disconnecting Pull
+2023-12-19T16:16:15.888 INFO Server Disconnecting
+2023-12-19T16:19:03.548 INFO Server Started
+2023-12-19T16:20:45.574 INFO Server Started
+2023-12-19T16:20:52.588 INFO Disconnecting Replier
+2023-12-19T16:20:52.588 INFO Disconnecting Publisher
+2023-12-19T16:20:52.588 INFO Disconnecting Pull
+2023-12-19T16:20:52.588 INFO Server Disconnecting
+2023-12-19T16:30:57.613 INFO Server Started
+2023-12-19T16:31:09.947 INFO Disconnecting Replier
+2023-12-19T16:31:09.947 INFO Disconnecting Publisher
+2023-12-19T16:31:09.947 INFO Disconnecting Pull
+2023-12-19T16:31:09.947 INFO Server Disconnecting
+2023-12-19T16:31:16.603 INFO Disconnecting Replier
+2023-12-19T16:31:16.603 INFO Disconnecting Publisher
+2023-12-19T16:31:16.604 INFO Disconnecting Pull
+2023-12-19T16:31:16.604 INFO Server Disconnecting
+2023-12-19T16:40:26.515 INFO Server Started
+2023-12-19T16:40:34.302 INFO Disconnecting Replier
+2023-12-19T16:40:34.302 INFO Disconnecting Publisher
+2023-12-19T16:40:34.302 INFO Disconnecting Pull
+2023-12-19T16:40:34.302 INFO Server Disconnecting
+2023-12-19T16:41:25.995 INFO Server Started
+2023-12-19T16:41:37.725 INFO Disconnecting Replier
+2023-12-19T16:41:37.726 INFO Disconnecting Publisher
+2023-12-19T16:41:37.726 INFO Disconnecting Pull
+2023-12-19T16:41:37.726 INFO Server Disconnecting
+2023-12-19T16:47:10.805 INFO Server Started
+2023-12-19T16:47:31.063 INFO Server Started
+2023-12-19T16:49:19.931 INFO Server Started
+2023-12-19T16:49:50.607 INFO Disconnecting Replier
+2023-12-19T16:49:50.608 INFO Disconnecting Publisher
+2023-12-19T16:49:50.608 INFO Disconnecting Pull
+2023-12-19T16:49:50.608 INFO Server Disconnecting
+2023-12-19T16:49:59.251 INFO Server Started
+2023-12-19T16:50:16.583 INFO Disconnecting Replier
+2023-12-19T16:50:16.583 INFO Disconnecting Publisher
+2023-12-19T16:50:16.583 INFO Disconnecting Pull
+2023-12-19T16:50:16.584 INFO Server Disconnecting
+2023-12-19T16:51:24.283 INFO Server Started
+2023-12-19T16:51:30.902 INFO Disconnecting Replier
+2023-12-19T16:51:30.902 INFO Disconnecting Publisher
+2023-12-19T16:51:30.902 INFO Disconnecting Pull
+2023-12-19T16:51:30.902 INFO Server Disconnecting
+2023-12-19T16:52:25.604 INFO Server Started
+2023-12-19T16:52:43.365 INFO Disconnecting Replier
+2023-12-19T16:52:43.365 INFO Disconnecting Publisher
+2023-12-19T16:52:43.366 INFO Disconnecting Pull
+2023-12-19T16:52:43.366 INFO Server Disconnecting
+2023-12-19T16:53:10.244 INFO Server Started
+2023-12-19T16:53:20.453 INFO Disconnecting Replier
+2023-12-19T16:53:20.453 INFO Disconnecting Publisher
+2023-12-19T16:53:20.453 INFO Disconnecting Pull
+2023-12-19T16:53:20.453 INFO Server Disconnecting
+2023-12-19T16:55:13.171 INFO Server Started
+2023-12-19T16:55:24.659 INFO Disconnecting Replier
+2023-12-19T16:55:24.659 INFO Disconnecting Publisher
+2023-12-19T16:55:24.659 INFO Disconnecting Pull
+2023-12-19T16:55:24.660 INFO Server Disconnecting
+2023-12-19T16:55:55.929 INFO Server Started
+2023-12-19T16:56:28.426 INFO Disconnecting Replier
+2023-12-19T16:56:28.426 INFO Disconnecting Publisher
+2023-12-19T16:56:28.426 INFO Disconnecting Pull
+2023-12-19T16:56:28.426 INFO Server Disconnecting
+2023-12-19T16:56:41.297 INFO Server Started
+2023-12-19T16:56:47.442 INFO Disconnecting Replier
+2023-12-19T16:56:47.442 INFO Disconnecting Publisher
+2023-12-19T16:56:47.442 INFO Disconnecting Pull
+2023-12-19T16:56:47.442 INFO Server Disconnecting
+2023-12-19T16:57:00.197 INFO Server Started
+2023-12-19T16:57:10.754 INFO Disconnecting Replier
+2023-12-19T16:57:10.754 INFO Disconnecting Publisher
+2023-12-19T16:57:10.754 INFO Disconnecting Pull
+2023-12-19T16:57:10.754 INFO Server Disconnecting
+2023-12-19T16:57:31.863 INFO Server Started
+2023-12-19T16:57:54.441 INFO Disconnecting Replier
+2023-12-19T16:57:54.441 INFO Disconnecting Publisher
+2023-12-19T16:57:54.442 INFO Disconnecting Pull
+2023-12-19T16:57:54.442 INFO Server Disconnecting
+2023-12-19T17:00:39.985 INFO Server Started
+2023-12-19T17:00:50.066 INFO Moving to 5000 position
+2023-12-19T17:00:50.185 INFO Status published: {'is_moving': True, 'position': 0, 'error': '', 'connected': True}
+2023-12-19T17:00:50.185 INFO Position published: 27
+2023-12-19T17:00:50.455 INFO Position published: 249
+2023-12-19T17:00:50.725 INFO Position published: 585
+2023-12-19T17:00:50.995 INFO Position published: 918
+2023-12-19T17:00:51.311 INFO Position published: 1306
+2023-12-19T17:00:51.582 INFO Position published: 1556
+2023-12-19T17:00:51.853 INFO Status published: {'is_moving': False, 'position': 1556, 'error': '', 'connected': True}
+2023-12-19T17:00:51.853 INFO Position published: 1598
+2023-12-19T17:01:01.474 INFO Moving to 0 position
+2023-12-19T17:01:01.595 INFO Status published: {'is_moving': True, 'position': 1598, 'error': '', 'connected': True}
+2023-12-19T17:01:01.595 INFO Position published: 1572
+2023-12-19T17:01:01.867 INFO Position published: 1347
+2023-12-19T17:01:02.138 INFO Position published: 1011
+2023-12-19T17:01:02.408 INFO Position published: 676
+2023-12-19T17:01:02.678 INFO Position published: 341
+2023-12-19T17:01:02.948 INFO Position published: 65
+2023-12-19T17:01:03.216 INFO Status published: {'is_moving': False, 'position': 65, 'error': '', 'connected': True}
+2023-12-19T17:01:03.216 INFO Position published: -2
+2023-12-19T17:01:13.525 INFO Moving to 15000 position
+2023-12-19T17:01:13.643 INFO Status published: {'is_moving': True, 'position': -2, 'error': '', 'connected': True}
+2023-12-19T17:01:13.643 INFO Position published: 22
+2023-12-19T17:01:13.913 INFO Position published: 244
+2023-12-19T17:01:14.184 INFO Position published: 579
+2023-12-19T17:01:14.454 INFO Position published: 914
+2023-12-19T17:01:14.725 INFO Position published: 1249
+2023-12-19T17:01:14.997 INFO Position published: 1585
+2023-12-19T17:01:15.268 INFO Position published: 1920
+2023-12-19T17:01:15.539 INFO Position published: 2256
+2023-12-19T17:01:15.810 INFO Position published: 2591
+2023-12-19T17:01:16.082 INFO Position published: 2926
+2023-12-19T17:01:16.353 INFO Position published: 3262
+2023-12-19T17:01:16.624 INFO Position published: 3598
+2023-12-19T17:01:16.896 INFO Position published: 3933
+2023-12-19T17:01:17.167 INFO Position published: 4268
+2023-12-19T17:01:17.439 INFO Position published: 4600
+2023-12-19T17:01:17.710 INFO Position published: 4784
+2023-12-19T17:01:17.981 INFO Status published: {'is_moving': False, 'position': 4784, 'error': '', 'connected': True}
+2023-12-19T17:01:17.981 INFO Position published: 4798
+2023-12-19T17:02:00.833 INFO Moving to 0 position
+2023-12-19T17:02:00.954 INFO Status published: {'is_moving': True, 'position': 4798, 'error': '', 'connected': True}
+2023-12-19T17:02:00.954 INFO Position published: 4772
+2023-12-19T17:02:01.225 INFO Position published: 4548
+2023-12-19T17:02:01.496 INFO Position published: 4212
+2023-12-19T17:02:01.767 INFO Position published: 3877
+2023-12-19T17:02:02.039 INFO Position published: 3542
+2023-12-19T17:02:02.310 INFO Position published: 3207
+2023-12-19T17:02:02.582 INFO Position published: 2871
+2023-12-19T17:02:02.853 INFO Position published: 2537
+2023-12-19T17:02:03.124 INFO Position published: 2202
+2023-12-19T17:02:03.395 INFO Position published: 1867
+2023-12-19T17:02:03.667 INFO Position published: 1533
+2023-12-19T17:02:03.938 INFO Position published: 1198
+2023-12-19T17:02:04.220 INFO Position published: 848
+2023-12-19T17:02:04.490 INFO Position published: 515
+2023-12-19T17:02:04.760 INFO Position published: 187
+2023-12-19T17:02:05.028 INFO Position published: 9
+2023-12-19T17:02:05.297 INFO Status published: {'is_moving': False, 'position': 9, 'error': '', 'connected': True}
+2023-12-19T17:02:05.297 INFO Position published: -1
+2023-12-19T17:02:50.548 INFO Disconnecting Replier
+2023-12-19T17:02:50.548 INFO Disconnecting Publisher
+2023-12-19T17:02:50.548 INFO Disconnecting Pull
+2023-12-19T17:02:50.549 INFO Server Disconnecting
+2023-12-19T17:03:00.405 INFO Disconnecting Replier
+2023-12-19T17:03:00.405 INFO Disconnecting Publisher
+2023-12-19T17:03:00.406 INFO Disconnecting Pull
+2023-12-19T17:03:00.406 INFO Server Disconnecting

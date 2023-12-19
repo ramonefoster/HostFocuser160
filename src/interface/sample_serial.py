@@ -63,7 +63,6 @@ class Focuser():
         return res
     @connected.setter
     def connected(self, connected: bool):
-        print("Connecting")
         self._lock.acquire()
         self._connected = connected
         if connected:            
@@ -77,12 +76,11 @@ class Focuser():
                 try:
                     self._serial.open()
                     self._serial.flush()
-                    time.sleep(1)
+                    time.sleep(.3)
                 except:
                     self._connected = False
                     raise RuntimeError('Cannot Connect')
             self._lock.release()
-            print("Connected")
         elif not connected:
             self._lock.release()
             self.disconnect()       

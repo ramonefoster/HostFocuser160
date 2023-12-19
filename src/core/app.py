@@ -31,6 +31,7 @@ class App():
         self.port_rep = Config.port_rep
 
         # Control variables
+        self.stop_var = False
         self.previous_is_mov = False
         self.previous_pos = 0
 
@@ -93,6 +94,7 @@ class App():
             self.logger.error(f'Error closing {connection_name} connection: {str(e)}')
 
     def disconnect(self):
+        self.stop()
         connections = {
             self.replier: 'Replier',
             self.publisher: 'Publisher',
@@ -108,15 +110,20 @@ class App():
         json_string = json.dumps(self.status)
         self.publisher.send_string(json_string)
     
+    def stop(self):
+        self.stop_var = True
+    
     def run(self):
-        while True:
+        self.stop_var = False
+        while not self.stop_var:
             if self.device:                
                 # Sets timeout 
                 socks = dict(self.poller.poll(100))
                 # Pull is being used for operation actions, such as Move, Init and Halt
                 if socks.get(self.puller) == zmq.POLLIN:
                     msg_pull = self.puller.recv().decode()
-                    try:                        
+                    try:     
+                        self.status["error"] = ''                   
                         if msg_pull == 'HALT':
                             self.device.Halt()
                         elif msg_pull == 'CONN':
@@ -131,8 +138,9 @@ class App():
                             self.logger.info(f'Moving to {msg_pull} position')
                         else:
                             pass
-                    except Exception as e:
-                        self.publisher.send_string(f"Error {str(e)}")
+                    except Exception as e:                        
+                        self.status["error"] = f"{str(e)}"
+                        self.pub_status()
                         self.logger.error(f'Error Moving: {str(e)}')
 
                 # Req/Reply can be used both as cmd receiver and status
@@ -156,7 +164,6 @@ class App():
 
                     # Verifies if theres a change in is_moving status
                     if current_is_mov != self.previous_is_mov:
-                        print("is_mov", current_is_mov)
                         self.status["is_moving"] = current_is_mov
                         self.pub_status()
                         self.previous_is_mov = current_is_mov
@@ -164,11 +171,10 @@ class App():
 
                     # Verifies if theres a change in position value
                     if current_pos != self.previous_pos:
-                        print("pos", current_pos)
                         self.status["position"] = current_pos
                         self.pub_status()
                         self.previous_pos = current_pos
                         self.logger.info(f'Position published: {current_pos}')
 
-                    # Add a small delay to avoid excessive processing
-            time.sleep(0.1)
+            # Add a small delay to avoid excessive processing
+            time.sleep(0.05)
