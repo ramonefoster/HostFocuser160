@@ -81,15 +81,16 @@ class Focuser():
                     self._connected = False
                     raise RuntimeError('Cannot Connect')
             self._lock.release()
-        elif not connected:
+        else:
             self._lock.release()
             self.disconnect()       
    
     def disconnect(self):
         self._lock.acquire()
-        if self._serial.is_open:
+        if self._serial and self._serial.is_open:
             try:
                 self._serial.close()
+                self._connected = False
             except:
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
@@ -260,7 +261,7 @@ class Focuser():
         self.stop()        
    
     def _write(self, cmd):
-        if self._serial.is_open:
+        if self._serial and self._serial.is_open:
             try:    
                 time.sleep(.05)            
                 self._serial.write(bytes(cmd, 'utf-8'))

@@ -118,26 +118,30 @@ class App():
         while not self.stop_var:
             if self.device:                
                 # Sets timeout 
-                socks = dict(self.poller.poll(100))
+                socks = dict(self.poller.poll(50))
                 # Pull is being used for operation actions, such as Move, Init and Halt
                 if socks.get(self.puller) == zmq.POLLIN:
                     msg_pull = self.puller.recv().decode()
                     try:     
+                        
                         self.status["error"] = ''                   
                         if msg_pull == 'HALT':
                             self.device.Halt()
+                            self.logger.info(f'Device Stopped')
                         elif msg_pull == 'CONN':
                             self.device.connected = True
-                            self.status["connected"] = self.device.connected
+                            self.logger.info(f'Device Connected')
                             self.pub_status()
                         elif msg_pull == 'DC':
                             self.device.connected = False
+                            self.logger.info(f'Device Disconnected')
                         elif "M" in msg_pull:
                             msg_pull = msg_pull[1:]
                             self.device.move(int(msg_pull))
                             self.logger.info(f'Moving to {msg_pull} position')
                         else:
                             pass
+                        self.status["connected"] = self.device.connected
                     except Exception as e:                        
                         self.status["error"] = f"{str(e)}"
                         self.pub_status()
