@@ -9,7 +9,7 @@ import sys
 import toml
 
 _dict = {}
-_dict = toml.load(r'src/config/config.toml')
+_dict = toml.load('/home/ramones/Documents/HostControllerF160/src/config/config.toml')
 def get_toml(sect: str, item: str):
     if not _dict is {}:
         return _dict[sect][item]

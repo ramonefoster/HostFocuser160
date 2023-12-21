@@ -20,7 +20,7 @@ from src.core.app import App
 from src.core.log import init_logging
 from src.core.config import Config
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType('assets/main.ui')
+Ui_MainWindow, QtBaseClass = uic.loadUiType('/home/ramones/Documents/HostControllerF160/assets/main.ui')
 
 class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -96,7 +96,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
             self.run_thread.join()
     
     def toggle_config_view(self):
-        file_name = 'src/config/config.toml'
+        file_name = '/home/ramones/Documents/HostControllerF160/src/config/config.toml'
         if file_name:
             self.read_config_file(file_name)
             self.conf_dock_widget.show()
@@ -107,7 +107,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
             self.conf_text_edit.setPlainText(log_content)
     
     def save_config_file(self):
-        file_name = 'src/config/config.toml'
+        file_name = '/home/ramones/Documents/HostControllerF160/src/config/config.toml'
         content_to_save = self.conf_text_edit.toPlainText()
 
         if file_name:
@@ -116,7 +116,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def toggle_log_view(self, state):
         if state == Qt.Checked:
-            file_name = 'logs/focuser.log'
+            file_name = '/home/ramones/Documents/HostControllerF160/logs/focuser.log'
             if file_name:
                 self.read_log_file(file_name)
                 self.log_dock_widget.show()
