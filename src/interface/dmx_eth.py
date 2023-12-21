@@ -6,6 +6,7 @@ from threading import Timer
 from src.core.config import Config
 
 import socket
+import select
 import time
 
 class FocuserDriver():
@@ -13,17 +14,16 @@ class FocuserDriver():
         self._lock = Lock()
         self.name: str = 'LNA Focuser'
         self.logger = logger
-
-        self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         self._step_size: float = 1.0
         
         self._reverse = False
         self._absolute = True
-        self._max_step = 7000
+        self._max_step = 100000
         self._max_increment = 100
         self._is_moving = False
         self._connected = False
+        self._status = ""
         
         self._temp_comp = False 
         self._temp_comp_available = False
@@ -33,6 +33,8 @@ class FocuserDriver():
         self._position = 0
         self._tgt_position = 0
         self._stopped = True
+        self._homing = False
+        self._at_home = False
 
         self._timeout = 1
 
@@ -52,8 +54,9 @@ class FocuserDriver():
         if connected:
             self._lock.release()            
             try: 
-                self._client_socket.connect((Config.device_ip, Config.device_port))
-                time.sleep(.5)                   
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                    client_socket.connect((Config.device_ip, Config.device_port))
+                time.sleep(.1)    
             except:
                 raise RuntimeError('Cannot Connect')
         else:
@@ -68,7 +71,7 @@ class FocuserDriver():
         self._lock.acquire()
         if self._connected:
             try:
-                self._client_socket.close()
+                pass
             except:
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
@@ -92,21 +95,8 @@ class FocuserDriver():
     
     def _run(self) -> None:
         print('[_run] (tmr expired) get lock')
-        self.position
-        self._lock.acquire()
-        delta = self._tgt_position - self._position
-        self._lock.release()
-        print(f'[_run] final delta={str(delta)}')
-        if delta != 0:
-            self.position
-            self._lock.acquire()
-            self._is_moving = True
-            self._lock.release()
-        else:
-            self._lock.acquire()
-            self._is_moving = False
+        if not self._is_moving:
             self._stopped = True
-            self._lock.release()
         print('[_run] lock released')
         if self._is_moving:
             print('[_run] more motion needed, start another timer interval')
@@ -141,10 +131,10 @@ class FocuserDriver():
             self._temp_comp = temp
         self._lock.release()
         res = self._temp_comp
-        if self._temp_comp:
-            self.logger.info(f'[temp_comp] {str(res)}')
-        else:
-            self.logger.info(f'[temp_comp] {str(res)}')
+        # if self._temp_comp:
+        #     self.logger.info(f'[temp_comp] {str(res)}')
+        # else:
+        #     self.logger.info(f'[temp_comp] {str(res)}')
 
     @property
     def position(self) -> int:
@@ -153,33 +143,51 @@ class FocuserDriver():
         while retries < max_retries:
             try:
                 self._lock.acquire()
-                self._position = int(self._write("P\n"))
-                self.logger.debug(f'[Device] position: {str(self._position)}')
+                self._position = -1*int(self._write("EX"))
                 self._lock.release()
-                print(f"[position] {self._position}")
                 return self._position
             except ValueError as e:
                 self.logger.error(f'[Device] Error reading position: {str(e)}')
                 retries += 1  
-                self._lock.release() 
-        
-        return -1        
+                self._lock.release()         
+        return 0        
     
     @property
     def is_moving(self) -> bool:
         self._lock.acquire()
-        # self._is_moving = self._write("R\n")
-        res = self._is_moving
+        x = self._write("V46")
+        if "1" in x:
+            self._is_moving = True
+        elif "0" in x:
+            self._is_moving = False        
         self._lock.release()
-        self.logger.debug(f'[Device] is_moving: {str(res)}')
+        res = self._is_moving
         return res
+
+    @property
+    def homing(self) -> bool:
+        self._lock.acquire()
+        x = self._write("V44")
+        if "0" in x:
+            self._homing = True
+        else:
+            self._homing = False
+        res = self._homing
+        self._lock.release()
+        return res
+
+    @property
+    def get_status(self) -> str:
+        self._lock.acquire()
+        self._status = self._write("GS0")
+        self._lock.release()
+        return self._status
     
     @property
     def absolute(self) -> bool:  
         self._lock.acquire()      
         res = self._absolute
         self._lock.release()
-        self.logger.debug(f'[Device] absolute: {str(res)}')
         return res
 
     @property
@@ -187,7 +195,6 @@ class FocuserDriver():
         self._lock.acquire()
         res = self._max_increment
         self._lock.release()
-        self.logger.debug(f'[Device] max_increment: {str(res)}')
         return res
 
     @property
@@ -195,7 +202,6 @@ class FocuserDriver():
         self._lock.acquire()
         res = self._max_step
         self._lock.release()
-        self.logger.debug(f'[Device] max_step: {str(res)}')
         return res
 
     @property
@@ -203,15 +209,17 @@ class FocuserDriver():
         self._lock.acquire()
         res = self._step_size
         self._lock.release()
-        self.logger.debug(f'[Device] step_size: {str(res)}')
         return res
     
-    def initialize(self):
-        res = self._write(f"HOME\n")
-        self.logger.debug(f'[Device] home: {str(res)}')
+    def home(self):
+        if self._is_moving:
+            raise RuntimeError('Cannot start a move while the focuser is moving')
+        res = self._write(f"GS30")  
+        self.start()      
+        self.logger.info(f'[Device] home: {str(res)}')  
+        return res      
 
-    def move(self, position: int):
-        self.logger.debug(f'[Device] move={str(position)}')
+    def move(self, position: int):        
         self._lock.acquire()        
         if self._is_moving:
             self._lock.release()
@@ -221,41 +229,51 @@ class FocuserDriver():
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')
         self._tgt_position = position 
-        resp = self._write(f"M{position}\n")
-        c = 0
-        while not resp:
-            if c >= 5:
-                self._is_moving = True
-            c += 1     
-            resp = bool(self._write(f"M{position}\n"))   
-        self._is_moving = bool(resp) 
-        print('[move]', self._is_moving)
+        resp = self._write(f"V20={position}")
+        if "OK" in resp:
+            print('[move]', resp)
+            self._write(f"GS29")
+            self.logger.info(f'[Device] move={str(position)}')
         self._lock.release() 
         self.start() 
 
     def stop(self) -> None:
         self._lock.acquire()
-        print('[stop] Stopping...')
-        self._stopped = True
+        print('[stop] Stopping...')        
         self._is_moving = False
+        self._stopped = True
         if self._timer is not None:
             self._timer.cancel()
         self._timer = None
         self._lock.release()      
     
-    def Halt(self) -> None:
-        self.logger.debug('[Device] halt')
-        self._write(f"S\n")
-        self.stop()        
+    def Halt(self) -> None:        
+        if self._write(f"STOP") == 'OK':            
+            self.logger.info('[Device] halt')
+            self.stop()
+            return True
+        else:
+            return False        
     
     def _write(self, cmd):
         if self._connected:
-            try:    
-                sent_bytes = self._client_socket.send(bytes(cmd, 'utf-8'))
-                return sent_bytes
+            time.sleep(.19)
+            try:   
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                    client_socket.connect((Config.device_ip, Config.device_port)) 
+                    cmd = cmd + '\x00'
+                    client_socket.sendall(bytes(cmd, 'utf-8'))
+                    # Check if there is data available to read without blocking
+                    ready = select.select([client_socket], [], [], 1)  # Timeout set to 1 second
+                    if ready[0]:
+                        response = client_socket.recv(1024)                         
+                        return response.decode('utf-8').replace("\x00", "")  
+                    print("timeout")
+                    self.logger.error(f"[Device] Error writing to device: {str(e)}")
+                    return "Timeout"  # No response received within the timeout
             except Exception as e:
                 self.logger.error(f"[Device] Error writing to device: {str(e)}")
-                print("Error writing COM: "+ str(e))
+                print("Error writing ETH: "+ str(e))
                 return "Error"
         else:
             return "Not Open"

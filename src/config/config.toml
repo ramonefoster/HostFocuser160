@@ -10,13 +10,13 @@ startup = true
 deviceType = 'Focuser'
 deviceID = '3285e9af-8d1d-4f9d-b368-d129d8e9a24b' # https://guidgenerator.com/online-guid-generator.aspx
 absolute = true
-max_step = 20000
+max_step = 70000
 temp_comp = false
-device_ip = '192.168.50.182'
+device_ip = '192.168.1.250'
 device_port = 5001
 
 [Network]
-ip_address = '127.0.0.1'
+ip_address = '192.168.1.101'
 port_pub = 7001
 port_pull = 7002
 port_rep = 7003

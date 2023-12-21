@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import QMessageBox, QFileDialog, QInputDialog
 from PyQt5 import QtGui
 
 import sys
+import time
+import socket
 from threading import Thread
 
 from src.core.app import App
@@ -78,6 +80,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.run_thread = None
         self.statusBar().showMessage("Ready")
+        self.ping()
 
         if Config.startup:
             self.start()
@@ -129,9 +132,17 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_log_timer.timeout.connect(lambda: self.read_log_file(file_path))
         self.update_log_timer.start(20000)
     
+    def ping(self):
+        if self.control.ping_server():
+            self.lblPing.setText("Device is Reachable")
+        else:
+            self.lblPing.setText("Device is NOT Reachable")
+        
     def update(self):        
         status = self.control.status
         con = status["connected"]
+        if round(time.time(), 0)%11 == 0:
+            self.ping()
         if self.run_thread and self.run_thread.is_alive():
             self.statusBar().setStyleSheet("background-color: green")
         else:
