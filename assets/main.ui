@@ -69,7 +69,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Minimizes program to trail.</string>
+     <string>Minimizes program to tray.</string>
     </property>
     <property name="text">
      <string>Hide</string>
@@ -276,7 +276,7 @@ border-radius: 10px;</string>
      <x>0</x>
      <y>0</y>
      <width>240</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSetup">

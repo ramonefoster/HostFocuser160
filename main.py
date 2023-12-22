@@ -5,22 +5,21 @@
 #
 # Python Compatibility: Requires Python 3.10 or later
 
-from PyQt5 import QtWidgets, uic, QtTest
-from PyQt5.QtCore import QTimer, QUrl, QThreadPool, pyqtSlot, Qt
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QInputDialog
-from PyQt5 import QtGui
+from PyQt5.QtWidgets import QMessageBox, QMenu, QSystemTrayIcon, QAction
 
 import sys
 import time
-import socket
+import os
 from threading import Thread
 
 from src.core.app import App
 from src.core.log import init_logging
 from src.core.config import Config
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType('/home/ramones/Documents/HostControllerF160/assets/main.ui')
+Ui_MainWindow, QtBaseClass = uic.loadUiType(r'C:\Users\ramon\OneDrive\Área de Trabalho\HostFocu160\assets\main.ui')
 
 class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -28,13 +27,17 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
+        self.control = App(logger)
+
+        self.config_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\config.toml")
+        self.log_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\focuser.log")
+
         main_window_geometry = self.geometry()  # Get the geometry of the main window
 
         # Calculate the coordinates for the right side of the main window
         dock_x = main_window_geometry.x() + main_window_geometry.width() + 100  # Adjust for spacing
         dock_y = main_window_geometry.y()
-
-        self.control = App(logger)
+        
         self.lblIP.setText(f"IP: {self.control.ip_address}")
         self.lblPort.setText(f"{self.control.port_pub}, {self.control.port_pull}, {self.control.port_rep}")
 
@@ -73,6 +76,21 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnStart.clicked.connect(self.start)
         self.btnStop.clicked.connect(self.stop)  
         self.actionSettings.triggered.connect(self.toggle_config_view)
+        self.btnHide.clicked.connect(self.minimize_to_tray)
+        # Create a system tray icon
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon(r'C:\Users\ramon\OneDrive\Área de Trabalho\HostFocu160\assets\icon.png'))  # Replace 'icon.png' with your icon file
+        self.tray_icon.setToolTip('Focus160Server')
+
+        self.tray_menu = QMenu(self)
+        restore_action = QAction('Restore', self)
+        restore_action.triggered.connect(self.restore_from_tray)
+        self.tray_menu.addAction(restore_action)
+
+        self.tray_icon.setContextMenu(self.tray_menu)
+        self.tray_icon.activated.connect(self.tray_activated)
+
+        self.tray_icon.show()
 
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.update)
@@ -85,7 +103,21 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         if Config.startup:
             self.start()
     
+    def minimize_to_tray(self):
+        self.hide()  
+        self.tray_icon.show() 
+
+    def restore_from_tray(self):
+        self.show()  
+        self.tray_icon.hide()
+    
+    def tray_activated(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.restore_from_tray()
+    
     def start(self):
+        if self.run_thread and self.run_thread.is_alive():
+            print("Still Alive")
         self.run_thread = Thread(target = self.control.run)
         self.run_thread.start()
         # self.run_thread.daemon = True
@@ -95,11 +127,9 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.run_thread and self.run_thread.is_alive():
             self.run_thread.join()
     
-    def toggle_config_view(self):
-        file_name = '/home/ramones/Documents/HostControllerF160/src/config/config.toml'
-        if file_name:
-            self.read_config_file(file_name)
-            self.conf_dock_widget.show()
+    def toggle_config_view(self):   
+        self.read_config_file(self.config_file)
+        self.conf_dock_widget.show()
 
     def read_config_file(self, file_path):
         with open(file_path, "r") as file:
@@ -107,18 +137,15 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
             self.conf_text_edit.setPlainText(log_content)
     
     def save_config_file(self):
-        file_name = '/home/ramones/Documents/HostControllerF160/src/config/config.toml'
-        content_to_save = self.conf_text_edit.toPlainText()
-
-        if file_name:
-            with open(file_name, "w") as file:
-                file.write(content_to_save)
+        content_to_save = self.conf_text_edit.toPlainText()        
+        with open(self.config_file, "w") as file:
+            file.write(content_to_save)
 
     def toggle_log_view(self, state):
         if state == Qt.Checked:
-            file_name = '/home/ramones/Documents/HostControllerF160/logs/focuser.log'
-            if file_name:
-                self.read_log_file(file_name)
+            
+            if self.log_file:
+                self.read_log_file(self.log_file)
                 self.log_dock_widget.show()
         else:
             self.log_dock_widget.hide()

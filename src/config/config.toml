@@ -28,7 +28,6 @@ db_password = 'password'
 
 [Logging]
 log_level = 'INFO'
-log_file = 'logs/focuser.log'
 log_to_stdout = false
 log_max_size_mb = 5
 log_num_keep = 10

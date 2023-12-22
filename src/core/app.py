@@ -15,18 +15,20 @@ import time
 import zmq
 import json
 import socket
+import os
 
 from src.core.config import Config
 
 from src.interface.dmx_eth import FocuserDriver as Focuser
-# from src.interface.sample_serial import Focuser
 
 class App():
     def __init__(self, logger: Logger):
 
         self.logger = logger
+        self.config_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\config.toml")
 
         # Network Settings
+        self.context = None
         self.ip_address = Config.ip_address
         self.port_pub = Config.port_pub
         self.port_pull = Config.port_pull
@@ -53,7 +55,9 @@ class App():
 
         self.start_server()  
 
-    def start_server(self):        
+    def start_server(self):  
+        if self.context:    
+            return  
         """ Starts Server ZeroMQ"""
         # ZeroMQ Context
         self.context = zmq.Context()
@@ -76,38 +80,30 @@ class App():
         except Exception as e:
             self.logger.error(f'Error Binding Puller: {str(e)}')
             return
-        
-        try:
-            # Command Reply
-            self.replier = self.context.socket(zmq.REP)
-            self.replier.bind(f"tcp://{self.ip_address}:{self.port_rep}")
-            print(f"Replier binded to {self.ip_address}:{self.port_rep}")
-        except Exception as e:
-            self.logger.error(f'Error Binding Replier: {str(e)}')
-            return
 
         # Poller
         self.poller = zmq.Poller()
-        self.poller.register(self.puller, zmq.POLLIN)
+        self.poller.register(self.puller, zmq.POLLIN)        
         self.logger.info(f'Server Started')
     
-    def close_connection(self, connection, connection_name):
+    def close_connection(self):
         try:
-            connection.close()
-            self.logger.info(f'Disconnecting {connection_name}')
+            self.publisher.unbind(f"tcp://{self.ip_address}:{self.port_pub}")
+            self.logger.info(f'Disconnecting Publisher')
         except Exception as e:
-            self.logger.error(f'Error closing {connection_name} connection: {str(e)}')
+            self.logger.error(f'Error closing Publisher connection: {str(e)}')
+        try:
+            self.puller.unbind(f"tcp://{self.ip_address}:{self.port_pull}")
+            self.logger.info(f'Disconnecting Puller')
+        except Exception as e:
+            self.logger.error(f'Error closing Puller connection: {str(e)}')
+        self.poller.unregister(self.puller)
+        self.context.destroy()
+        self.context = None
 
     def disconnect(self):
         self.stop()
-        connections = {
-            self.replier: 'Replier',
-            self.publisher: 'Publisher',
-            self.puller: 'Pull'
-        }
-
-        for connection, name in connections.items():
-            self.close_connection(connection, name)
+        self.close_connection()
 
         self.logger.info(f'Server Disconnecting')
     
@@ -132,6 +128,7 @@ class App():
             return True
     
     def run(self):
+        self.start_server()
         self.stop_var = False
         while not self.stop_var:
             if round(time.time(), 0)%11 == 0:
