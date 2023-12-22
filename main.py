@@ -19,7 +19,16 @@ from src.core.app import App
 from src.core.log import init_logging
 from src.core.config import Config
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType(r'C:\Users\ramon\OneDrive\Área de Trabalho\HostFocu160\assets\main.ui')
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+main_ui_path = resource_path(r'assets\main.ui')
+icon_tray = resource_path(r'assets\icon.png')
+
+print(main_ui_path, icon_tray)
+Ui_MainWindow, QtBaseClass = uic.loadUiType(main_ui_path)
 
 class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -79,7 +88,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnHide.clicked.connect(self.minimize_to_tray)
         # Create a system tray icon
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon(r'C:\Users\ramon\OneDrive\Área de Trabalho\HostFocu160\assets\icon.png'))  # Replace 'icon.png' with your icon file
+        self.tray_icon.setIcon(QIcon(icon_tray))  # Replace 'icon.png' with your icon file
         self.tray_icon.setToolTip('Focus160Server')
 
         self.tray_menu = QMenu(self)
@@ -175,9 +184,9 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.statusBar().setStyleSheet("background-color: indianred")
         if con:
-            self.statusBar().showMessage("Device Connected")
+            self.statusBar().showMessage("Client Connected")
         else:
-            self.statusBar().showMessage("Device Disconnected")
+            self.statusBar().showMessage("Client Disconnected")
         self.lblPos.setText(str(status["position"]))
         if len(status["error"]) > 1:
             self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")
@@ -198,6 +207,8 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         if close == QMessageBox.Yes:   
             self.stop()  
             event.accept()
+        else:
+            event.ignore()
 
 if __name__ == "__main__":
     logger = init_logging()
