@@ -24,8 +24,8 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-main_ui_path = resource_path(r'assets\main.ui')
-icon_tray = resource_path(r'assets\icon.png')
+main_ui_path = resource_path('assets/main.ui')
+icon_tray = resource_path('assets/icon.png')
 
 print(main_ui_path, icon_tray)
 Ui_MainWindow, QtBaseClass = uic.loadUiType(main_ui_path)
@@ -38,8 +38,8 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.control = App(logger)
 
-        self.config_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\config.toml")
-        self.log_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\focuser.log")
+        self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
+        self.log_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/focuser.log")
 
         main_window_geometry = self.geometry()  # Get the geometry of the main window
 
@@ -192,7 +192,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")
         else:
             self.lblErr.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
-        if status["is_moving"]:
+        if status["ismoving"]:
             self.lblMov.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
             self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")

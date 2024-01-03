@@ -42,12 +42,16 @@ class App():
 
         # Status Message
         self.status = {
-            "is_moving": False,
+            "absolute": Config.absolute,
+            "maxincrement": Config.maxincrement,
+            "tempcomp": Config.temp_comp,
+            "tempcompavailable": Config.tempcompavailable,
+            "ismoving": False,
             "position": 0,
             "error": '',
             "connected": False,
             "homing": False,
-            "at_home": False
+            "athome": False
             }
 
         # self.device = FocuserDriver(logger)
@@ -208,7 +212,7 @@ class App():
 
                     # Verifies if theres a change in is_moving status
                     if current_is_mov != self.previous_is_mov:
-                        self.status["is_moving"] = current_is_mov
+                        self.status["ismoving"] = current_is_mov
                         self.pub_status()
                         self.previous_is_mov = current_is_mov
                         self.logger.info(f'Status published: {self.status}')
