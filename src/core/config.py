@@ -21,9 +21,9 @@ def create_config_file():
         # If the file doesn't exist, create it
         try:
             # You can create an empty file using open() in 'w' mode
-            with open(config_file, 'a') as file:
+            create_default_toml_file()
                 # This will create an empty file if it doesn't exist
-                print("Config file didn't exist but was CREATED with success")
+                # print("Config file didn't exist but was CREATED with success")
         except IOError as e:
             print(f"Error creating the file: {e}")
 
@@ -68,7 +68,6 @@ def create_default_toml_file():
         toml.dump(default_data, toml_file)
 
 create_config_file()
-create_default_toml_file()
 
 _dict = {}
 _dict = toml.load(config_file)

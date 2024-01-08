@@ -248,7 +248,8 @@ class FocuserDriver():
         self._lock.release()      
     
     def Halt(self) -> None:        
-        if self._write(f"STOP") == 'OK':            
+        if self._write(f"STOP") == 'OK': 
+            self._write(f"GS0=0")           
             self.logger.info('[Device] halt')
             self.stop()
             return True
@@ -257,19 +258,19 @@ class FocuserDriver():
     
     def _write(self, cmd):
         if self._connected:
-            time.sleep(.19)
+            time.sleep(.25)
             try:   
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                     client_socket.connect((Config.device_ip, Config.device_port)) 
-                    cmd = cmd + '\x00'
+                    cmd = f'{cmd}\x00'
                     client_socket.sendall(bytes(cmd, 'utf-8'))
                     # Check if there is data available to read without blocking
-                    ready = select.select([client_socket], [], [], 1)  # Timeout set to 1 second
+                    ready = select.select([client_socket], [], [], 0.1)  # Timeout set to 1 second
                     if ready[0]:
                         response = client_socket.recv(1024)                         
                         return response.decode('utf-8').replace("\x00", "")  
                     print("timeout")
-                    self.logger.error(f"[Device] Error writing to device: {str(e)}")
+                    self.logger.error(f"[Device] Connection timeout")
                     return "Timeout"  # No response received within the timeout
             except Exception as e:
                 self.logger.error(f"[Device] Error writing to device: {str(e)}")

@@ -177,8 +177,8 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
     def update(self):        
         status = self.control.status
         con = status["connected"]
-        if round(time.time(), 0)%11 == 0:
-            self.ping()
+        # if round(time.time(), 0)%33 == 0:
+        #     self.ping()
         if self.run_thread and self.run_thread.is_alive():
             self.statusBar().setStyleSheet("background-color: green")
         else:

@@ -15,11 +15,11 @@ maxincrement = 0
 stepsize = 0
 tempcompavailable = false
 temp_comp = false
-device_ip = '192.168.1.250'
+device_ip = '192.168.1.223'
 device_port = 5001
 
 [Network]
-ip_address = '192.168.50.190'
+ip_address = '192.168.1.100'
 port_pub = 7001
 port_pull = 7002
 port_rep = 7003

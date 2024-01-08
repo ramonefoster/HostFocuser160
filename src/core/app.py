@@ -25,7 +25,7 @@ class App():
     def __init__(self, logger: Logger):
 
         self.logger = logger
-        self.config_file = os.path.join(os.path.expanduser("~"), r"Documents\Focuser160\config.toml")
+        self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
 
         # Network Settings
         self.context = None
@@ -39,6 +39,12 @@ class App():
         self.previous_is_mov = False
         self.previous_homing = False
         self.previous_pos = 0
+
+        #variables for status request
+        self._is_moving = False
+        self._position = 0
+        self._homing = False
+        self._stopping = False
 
         # Status Message
         self.status = {
@@ -135,39 +141,45 @@ class App():
         self.start_server()
         self.stop_var = False
         while not self.stop_var:
-            if round(time.time(), 0)%11 == 0:
-                self.ping_server()
+            # if round(time.time(), 0)%11 == 0:
+            #     self.ping_server()
                                         
             if self.device:                
                 # Sets timeout 
-                socks = dict(self.poller.poll(50))
+                socks = dict(self.poller.poll(10))
                 # Pull is being used for operation actions, such as Move, Init and Halt
                 if socks.get(self.puller) == zmq.POLLIN:
                     msg_pull = self.puller.recv().decode()
                     try:   
                         self.status["error"] = '' 
-                        if msg_pull == 'PING':
+                        if msg_pull == 'ping':
                             self.ping_server()
-                        if msg_pull == 'INIT':
+                        if msg_pull == 'home':
                             try:                           
                                 res = self.device.home()
+                                self._homing = True
+                                self._is_moving = True
                                 self.logger.info(f'Device Homing {res}') 
                             except Exception as e:
                                 self.status["error"] = f"{str(e)}"
                                 self.logger.error(f'Homing {e}')
                                 self.pub_status()
                                          
-                        if msg_pull == 'HALT':
+                        if msg_pull == 'halt':
                             if self.device.Halt():
+                                self._is_moving = True
                                 self.logger.info(f'Device Stopped')
                             else:
                                 self.logger.info(f'Halt Fail')
 
-                        elif msg_pull == 'CONN':
+                        elif msg_pull == 'connect':
                             self.device.connected = True
                             self.logger.info(f'Device Connected') 
                             try:                           
                                 res = self.device.home()
+                                self._is_moving = True
+                                self._homing = True
+                                current_pos = self.device.position
                             except Exception as e:
                                 self.status["error"] = f"{str(e)}"
                                 self.logger.error(f'Homing {e}')
@@ -176,15 +188,16 @@ class App():
                                 self.logger.info(f'Device Homing')
                             self.pub_status()
 
-                        elif msg_pull == 'DC':
+                        elif msg_pull == 'disconnect':
                             self.device.connected = False
                             self.logger.info(f'Device Disconnected')
 
-                        elif "M" in msg_pull:
-                            msg_pull = msg_pull[1:]
+                        elif "move" in msg_pull:
+                            msg_pull = msg_pull[4:]
                             try:
                                 self.device.move(int(msg_pull))
                                 self.logger.info(f'Moving to {msg_pull} position')
+                                self._is_moving = True
                             except Exception as e:
                                 self.status["error"] = f"{str(e)}"
                                 self.logger.error(f'Moving to {msg_pull} position')
@@ -197,32 +210,37 @@ class App():
                         self.pub_status()
                         self.logger.error(f'Error: {str(e)}')
 
+                current_pos = 0
                 # Retrieve current values
                 if self.device.connected:
-                    current_is_mov = self.device.is_moving
-                    current_pos = self.device.position 
-                    current_homing = self.device.homing  
+                    if self._is_moving:
+                        self._is_moving = self.device.is_moving
+                        self._position = self.device.position
+                    if self._homing:                   
+                        self._homing = self.device.homing 
+                        self._position = self.device.position 
+                     
                     self.status["connected"] = True   
 
-                    if current_homing != self.previous_homing:
-                        self.status["homing"] = current_homing
+                    if self._homing != self.previous_homing:
+                        self.status["homing"] = self._homing
                         self.pub_status()
-                        self.previous_homing = current_homing
+                        self.previous_homing = self._homing
                         self.logger.info(f'Status published: {self.status}')      
 
                     # Verifies if theres a change in is_moving status
-                    if current_is_mov != self.previous_is_mov:
-                        self.status["ismoving"] = current_is_mov
+                    if self._is_moving != self.previous_is_mov:
+                        self.status["ismoving"] = self._is_moving
                         self.pub_status()
-                        self.previous_is_mov = current_is_mov
+                        self.previous_is_mov = self._is_moving
                         self.logger.info(f'Status published: {self.status}')
 
                     # Verifies if theres a change in position value
-                    if current_pos != self.previous_pos:
-                        self.status["position"] = current_pos
+                    if self._position != self.previous_pos:
+                        self.status["position"] = self._position
                         self.pub_status()
-                        self.previous_pos = current_pos
-                        self.logger.info(f'Position published: {current_pos}')
+                        self.previous_pos = self._position
+                        self.logger.info(f'Position published: {self._position}')
 
             # Add a small delay to avoid excessive processing
-            time.sleep(0.1)
+            time.sleep(0.05)
