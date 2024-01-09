@@ -79,6 +79,7 @@ class App():
             self.publisher.bind(f"tcp://{self.ip_address}:{self.port_pub}")
             print(f"Publisher binded to {self.ip_address}:{self.port_pub}")
         except Exception as e:
+            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Publihser: {str(e)}')
             return
 
@@ -88,6 +89,7 @@ class App():
             self.puller.bind(f"tcp://{self.ip_address}:{self.port_pull}")
             print(f"Pull binded to {self.ip_address}:{self.port_pull}")
         except Exception as e:
+            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Puller: {str(e)}')
             return
 
