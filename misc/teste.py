@@ -44,3 +44,14 @@ print(type(y_interp), int(y_interp))
 # plt.ylabel('y')
 # plt.legend()
 # plt.show()
+
+import zmq
+
+json_x = {
+        "CLIENT_ID": "264242",
+        "DEVICES": {
+            "RA": {"ACTION": "MOVER", "PARAM": "4:32:22"},
+            "DEC": {"ACTION": "MOVER", "PARAM": "-32:32:22"},
+          }
+        }
+

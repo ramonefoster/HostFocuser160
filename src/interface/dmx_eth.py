@@ -34,6 +34,7 @@ class FocuserDriver():
         self._steps_per_sec = 1
 
         self._position = 0
+        self._last_pos = 0
         self._tgt_position = 0
         self._stopped = True
         self._homing = False
@@ -44,14 +45,12 @@ class FocuserDriver():
         self._timer: Timer = None
         self._interval: float = 1.0 / self._steps_per_sec
 
-        self._model_step = np.array([0, 1200, 1800, 2500, 3500, 5000, 7000, 
-                                     10000, 13000, 16000, 20000, 24500, 29000, 
-                                     31250, 36870, 40000, 43000, 45000, 50000, 57000, 
-                                     61000, 66000, 70000, 75000, 78500, 80000, 82000, 84000])
-        self._model_microns = np.array([0, 5, 27, 46, 55, 79, 111, 171, 236, 
-                                        282, 334, 395, 489, 517, 609, 661, 
-                                        708, 732, 817, 911, 985, 1074, 1134, 
-                                        1230, 1280, 1276, 1324, 1331])
+        self._model_step = np.array([0, 1000, 1500, 2500, 4000, 5900, 8500, 
+                                     12000, 15000, 18000, 22000, 27000, 32000, 
+                                     38000, 45000, 55000, 65000, 75000, 84000])
+        self._model_microns = np.array([0, 3, 18, 46, 52, 109, 146, 204, 
+                                        149, 289, 377, 447, 539, 631, 736, 
+                                        908, 1064, 1233, 1333])
         self._interp_func = interp1d(self._model_step, self._model_microns, kind='linear')
 
     @property
@@ -159,49 +158,53 @@ class FocuserDriver():
         elif self._temp_comp_available:        
             self._temp_comp = temp
         self._lock.release()
-        res = self._temp_comp
 
     @property
-    def position(self, max_retries = 2) -> int:          
-        retries = 0
-        while retries < max_retries:
-            try:
-                self._lock.acquire()
-                step = int(self._write("EX")) 
-                y_interp = int(self._interp_func(step))
-                self._position = y_interp
-                self._lock.release()
-                return self._position
-            except ValueError as e:
-                self.logger.error(f'[Device] Error reading position: {str(e)}')
-                retries += 1  
-                self._lock.release()  
-                time.sleep(.05)       
-        return 0        
+    def position(self) -> int:          
+        try:
+            self._lock.acquire()
+            step = int(self._write("EX", max_retries=3)) 
+            if step >= 0:
+                conv_position = int(self._interp_func(step))
+            elif step < 0:
+                conv_position = round(step*0.0162)
+                self._homing = True
+            else:
+                return self._last_pos
+            self._position = conv_position
+            self._last_pos = self._position
+            self._lock.release()
+            return self._position
+        except ValueError as e:
+            self.logger.error(f'[Device] Error reading position: {str(e)}')
+            self._lock.release()  
+        return self._last_pos        
     
     @property
     def is_moving(self) -> bool:
         self._lock.acquire()
-        x = self._write("V46")
+        x = self._write("V46", max_retries=3)
         if "1" in x:
             self._is_moving = True
+            self._lock.release()
+            return self._is_moving
         elif "0" in x:
-            self._is_moving = False        
+            self._is_moving = False 
+            self._lock.release()
+            return self._is_moving          
         self._lock.release()
-        res = self._is_moving
-        return res
+        return self._is_moving
 
     @property
     def homing(self) -> bool:
         self._lock.acquire()
-        x = self._write("V44")
+        x = self._write("V44", max_retries=3)
         if "0" in x:
             self._homing = True
         else:
             self._homing = False
-        res = self._homing
         self._lock.release()
-        return res
+        return self._homing
 
     @property
     def get_status(self) -> str:
@@ -238,49 +241,37 @@ class FocuserDriver():
         self._lock.release()
         return res
     
-    def home(self, max_retries=3, delay=0.1):
+    def home(self):
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
 
-        retries = 0
-        while retries < max_retries:
-            res = self._write("GS30")
-            if res == 'OK':
-                self.start()
-                self.logger.info('[Device] home: Success')
-                return res  # Command executed successfully
-            else:
-                retries += 1
-                time.sleep(delay)  # Wait for some time before retrying
+        res = self._write("GS30", max_retries=3)
+        if res == 'OK':
+            self.start()
+            self.logger.info('[Device] home: Success')
+            return res  
 
         self.logger.error('[Device] home: Failed after retries')
         return res      
 
-    def move(self, position: int, max_retries=3, delay=.05):        
-        self._lock.acquire()        
+    def move(self, position: int):        
         if self._is_moving:
-            self._lock.release()
             raise RuntimeError('Cannot start a move while the focuser is moving')
-        if position > self._max_step:
+        if 0 > position > self._max_step:
             raise RuntimeError('Invalid Steps')
         if self._temp_comp:
-            raise RuntimeError('Invalid TempComp')
-        self._tgt_position = position 
-        retries = 0
-        while retries < max_retries:
-            resp = self._write(f"V20={position}")
+            raise RuntimeError('Invalid TempComp')        
+        resp = self._write(f"V20={position}", max_retries=3)
+        if "OK" in resp:            
+            resp = self._write(f"GS29", max_retries=3)
             if "OK" in resp:
-                print('[move]', resp)
-                self._write(f"GS29")
                 self.logger.info(f'[Device] move={str(position)}')
-                self._lock.release() 
                 self.start() 
                 return
             else:
-                retries += 1
-                self._lock.release() 
-                time.sleep(delay)
-                return
+                raise RuntimeError(f'Error: {resp}')
+        else:
+            raise RuntimeError(f'Error: {resp}')            
 
     def stop(self) -> None:
         self._lock.acquire()
@@ -292,40 +283,37 @@ class FocuserDriver():
         self._timer = None
         self._lock.release()      
     
-    def Halt(self, max_retries=3, delay=.05) -> None:        
-        retries = 0
-        while retries < max_retries:
-            resp_stop = self._write("STOP")
+    def Halt(self) -> None:        
+        resp_stop = self._write("STOP", 3)
+        if resp_stop == 'OK':
+            resp_stop = self._write("GS0=0", 3)
             if resp_stop == 'OK':
-                self._write("GS0=0")
                 self.logger.info('[Device] halt')
                 self.stop()
-                return True  # Command executed successfully
-            else:
-                retries += 1
-                time.sleep(delay)  # Wait for some time before retrying
-
+                return True  # Command executed successfully 
         return False        
     
-    def _write(self, cmd):
-        if self._connected:
-            time.sleep(.25)
-            try:   
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-                    client_socket.connect((Config.device_ip, Config.device_port)) 
-                    cmd = f'{cmd}\x00'
-                    client_socket.sendall(bytes(cmd, 'utf-8'))
-                    # Check if there is data available to read without blocking
-                    ready = select.select([client_socket], [], [], 0.1)  # Timeout set to 1 second
-                    if ready[0]:
-                        response = client_socket.recv(1024)                         
-                        return response.decode('utf-8').replace("\x00", "")  
-                    print("timeout")
+    def _write(self, cmd, max_retries = 0):
+        retries = 0
+        if self._connected:              
+            while retries < max_retries:  
+                time.sleep(.1)        
+                try:   
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:                        
+                        client_socket.connect((Config.device_ip, Config.device_port))                     
+                        client_socket.sendall(bytes(f'{cmd}\x00', 'utf-8'))
+                        # Check if there is data available to read without blocking
+                        ready = select.select([client_socket], [], [], 0.1)  # Timeout set to 1 second
+                        if ready[0]:
+                            response = client_socket.recv(1024)                         
+                            return response.decode('utf-8').replace("\x00", "")  
                     self.logger.error(f"[Device] Connection timeout")
-                    return "Timeout"  # No response received within the timeout
-            except Exception as e:
-                self.logger.error(f"[Device] Error writing to device: {str(e)}")
-                print("Error writing ETH: "+ str(e))
-                return "Error"
+                    return "Connection Timeout"  # No response received within the timeout
+                except Exception as e:
+                    err = e
+                retries += 1
+            self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
+            print(f"Error writing ETH: {cmd}: {str(err)}")
+            return "Error"
         else:
-            return "Not Open"
+            return "Not Connected"

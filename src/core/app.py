@@ -176,19 +176,9 @@ class App():
 
                         elif msg_pull == 'connect':
                             self.device.connected = True
-                            self.logger.info(f'Device Connected') 
-                            try:                           
-                                res = self.device.home()
-                                self._is_moving = True
-                                self._homing = True
-                                current_pos = self.device.position
-                            except Exception as e:
-                                self.status["error"] = f"{str(e)}"
-                                self.logger.error(f'Homing {e}')
-                                self.pub_status()
-                            if "OK" in res:
-                                self.logger.info(f'Device Homing')
-                            self.pub_status()
+                            self.logger.info(f'Device Connected')                             
+                            self.device.position                            
+                            self.pub_status()                            
 
                         elif msg_pull == 'disconnect':
                             self.device.connected = False
@@ -202,7 +192,7 @@ class App():
                                 self._is_moving = True
                             except Exception as e:
                                 self.status["error"] = f"{str(e)}"
-                                self.logger.error(f'Moving to {msg_pull} position')
+                                self.logger.error(f'Moving {msg_pull}: {str(e)}')
                                 self.pub_status()
                         else:
                             pass

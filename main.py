@@ -164,9 +164,9 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
             log_content = file.read()
             self.log_text_edit.setPlainText(log_content)
         
-        self.update_log_timer = QTimer(self)
-        self.update_log_timer.timeout.connect(lambda: self.read_log_file(file_path))
-        self.update_log_timer.start(20000)
+        # self.update_log_timer = QTimer(self)
+        # self.update_log_timer.timeout.connect(lambda: self.read_log_file(file_path))
+        # self.update_log_timer.start(20000)
     
     def ping(self):
         if self.control.ping_server():
