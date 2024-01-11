@@ -47,11 +47,30 @@ print(type(y_interp), int(y_interp))
 
 import zmq
 
-json_x = {
-        "CLIENT_ID": "264242",
-        "DEVICES": {
-            "RA": {"ACTION": "MOVER", "PARAM": "4:32:22"},
-            "DEC": {"ACTION": "MOVER", "PARAM": "-32:32:22"},
-          }
-        }
+# json_x = """{
+#   'CLIENT_ID': 264242, 
+#   'TRANSACTION_ID': 86452,
+#   'DEVICES': {
+#     'FOCUSER': {'ACTION': 'MOVER', 'PARAM': 1000}, 
+#     },
+#   }"""
 
+# x = json_x.replace("'", "\"")
+# import json
+# y = json.loads(x)
+# print(y.get("CLIENT_ID"))
+
+status = {
+            "absolute": True,
+            "maxincrement": 84000,
+            "tempcomp": False,
+            "tempcompavailable": False,
+            "ismoving": False,
+            "position": 0,
+            "error": '',
+            "connected": False,
+            "homing": False,
+            "athome": False
+            }
+
+print(status)

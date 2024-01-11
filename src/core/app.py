@@ -45,6 +45,7 @@ class App():
         self._position = 0
         self._homing = False
         self._stopping = False
+        self._id = None
 
         # Status Message
         self.status = {
@@ -62,6 +63,7 @@ class App():
 
         # self.device = FocuserDriver(logger)
         self.device = Focuser(logger)
+        self.device.connected = True
 
         self.start_server()  
 
@@ -151,12 +153,12 @@ class App():
                 socks = dict(self.poller.poll(10))
                 # Pull is being used for operation actions, such as Move, Init and Halt
                 if socks.get(self.puller) == zmq.POLLIN:
-                    msg_pull = self.puller.recv().decode()
-                    try:   
+                    msg_pull = self.puller.recv().decode()                    
+                    try:  
                         self.status["error"] = '' 
-                        if msg_pull == 'ping':
+                        if msg_pull == 'PING':
                             self.ping_server()
-                        if msg_pull == 'home':
+                        elif msg_pull == 'HOME':
                             try:                           
                                 res = self.device.home()
                                 self._homing = True
@@ -167,24 +169,26 @@ class App():
                                 self.logger.error(f'Homing {e}')
                                 self.pub_status()
                                          
-                        if msg_pull == 'halt':
+                        if msg_pull == 'HALT':
                             if self.device.Halt():
                                 self._is_moving = True
                                 self.logger.info(f'Device Stopped')
                             else:
                                 self.logger.info(f'Halt Fail')
 
-                        elif msg_pull == 'connect':
-                            self.device.connected = True
+                        elif msg_pull == 'CONNECT':                            
                             self.logger.info(f'Device Connected')                             
                             self.device.position                            
                             self.pub_status()                            
 
-                        elif msg_pull == 'disconnect':
+                        elif msg_pull == 'DISCONNECT':
                             self.device.connected = False
                             self.logger.info(f'Device Disconnected')
+                        
+                        elif msg_pull == 'STATUS':
+                            self.pub_status()
 
-                        elif "move" in msg_pull:
+                        elif "MOVE" in msg_pull:
                             msg_pull = msg_pull[4:]
                             try:
                                 self.device.move(int(msg_pull))
