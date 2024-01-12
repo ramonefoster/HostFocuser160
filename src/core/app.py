@@ -153,7 +153,7 @@ class App():
                 socks = dict(self.poller.poll(10))
                 # Pull is being used for operation actions, such as Move, Init and Halt
                 if socks.get(self.puller) == zmq.POLLIN:
-                    msg_pull = self.puller.recv().decode()                    
+                    msg_pull = self.puller.recv_string()
                     try:  
                         self.status["error"] = '' 
                         if msg_pull == 'PING':

@@ -74,3 +74,9 @@ status = {
             }
 
 print(status)
+import time
+while True:
+  print(round(time.time()%15))
+  if round(time.time()%15) == 0:
+     print("x")
+  time.sleep(1)
