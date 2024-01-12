@@ -9,15 +9,16 @@
 <h2>(Client SUB na porta 7001)</h2>
 Recebe um JSON com:
 status = {
-        "absolute": Config.absolute,
-        "maxincrement": Config.maxincrement,
-        "tempcomp": Config.temp_comp,
-        "tempcompavailable": Config.tempcompavailable,
-        "ismoving": False,
-        "position": 0,
-        "error": '',
-        "connected": False,
-        "homing": False,
-        "athome": False
+            "Absolute": Config.absolute,
+            "Maxincrement": Config.maxincrement,
+            "Tempcomp": Config.temp_comp,
+            "Tempcompavailable": Config.tempcompavailable,
+            "Ismoving": False,
+            "Position": 0,
+            "Error": '',
+            "Connected": False,
+            "Homing": False,
+            "Initialized": False,
+            "ClientID": 0
         }
 
