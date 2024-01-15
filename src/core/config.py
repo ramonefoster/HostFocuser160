@@ -38,16 +38,17 @@ def create_default_toml_file():
             "startup" : True
         },
         "Device": {
+            "absolute" : True,
             "deviceType" : 'Focuser',
             "deviceID" : '3285e9af-8d1d-4f9d-b368-d129d8e9a24b', # https://guidgenerator.com/online-guid-generator.aspx
-            "absolute" : True,
-            "max_step" : 50000,
-            "stepsize": 0,
+            "device_ip" : '192.168.1.250',
+            "device_port" : 5001,
+            "max_step" : 50000,            
             "maxincrement": 0,
             "tempcompavailable": False,
             "temp_comp" : False,
-            "device_ip" : '192.168.1.250',
-            "device_port" : 5001
+            "stepsize": 0,
+            "speed": 0,            
         },
         "Network" : {
                 "ip_address" : '127.0.0.1',
@@ -99,6 +100,7 @@ class Config:
     max_step: int = get_toml('Device', 'max_step')
     temp_comp: bool = get_toml('Device', 'temp_comp')
     stepsize: int = get_toml('Device', 'stepsize')
+    speed: int = get_toml('Device', 'speed')
     maxincrement: int = get_toml('Device', 'maxincrement')
     tempcompavailable: bool = get_toml('Device', 'tempcompavailable')
     # ---------------

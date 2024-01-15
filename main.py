@@ -106,8 +106,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
 
         self.run_thread = None
         self.statusBar().showMessage("Ready")
-        self.ping()
 
+        self.ping()
         if Config.startup:
             self.start()
     
@@ -172,7 +172,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         # self.update_log_timer.start(20000)
     
     def ping(self):
-        if self.control.ping_server():
+        if self.control.reachable:
             self.lblPing.setText("Device is Reachable")
         else:
             self.lblPing.setText("Device is NOT Reachable")

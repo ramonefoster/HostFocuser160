@@ -53,7 +53,8 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.txtStatus.setText(f"{Config.ip_address}")
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
-        self.timer.start(100)
+        self.get_status()
+        self.timer.start(100)        
 
     def start_client(self):
         self.subscriber = self.context.socket(zmq.SUB)
@@ -90,11 +91,14 @@ class ClientSimulator(QtWidgets.QMainWindow):
             self._msg_json["Action"]["CMD"] = F"MOVE={pos}"
             self.pusher.send_string(json.dumps(self._msg_json))
     
+    def get_status(self):
+        self._msg_json["Action"]["CMD"] = "STATUS"
+        self.pusher.send_string(json.dumps(self._msg_json))
+    
     def update(self):
         if round(time.time()%35) == 0:
-            self._msg_json["Action"]["CMD"] = f"STATUS"
-            self.pusher.send_string(json.dumps(self._msg_json))
-        self.socks = dict(self.poller.poll(10))
+            self.get_status()
+        self.socks = dict(self.poller.poll(100))
         if self.socks.get(self.subscriber) == zmq.POLLIN:
             message = self.subscriber.recv_string()
             self.txtStatus.setText(message)

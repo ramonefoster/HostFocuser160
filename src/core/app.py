@@ -33,6 +33,7 @@ class App():
         self.port_pub = Config.port_pub
         self.port_pull = Config.port_pull
         self.poller = None
+        self.connection_speed = 0
 
         # Control variables
         self.stop_var = False
@@ -50,19 +51,21 @@ class App():
         # Status Message
         self.status = {
             "Absolute": Config.absolute,
-            "Maxincrement": Config.maxincrement,
-            "Tempcomp": Config.temp_comp,
-            "Tempcompavailable": Config.tempcompavailable,
-            "Ismoving": False,
-            "Position": 0,
-            "Error": '',
+            "ClientID": 0,
             "Connected": False,
+            "Error": '',
             "Homing": False,
             "Initialized": False,
-            "ClientID": 0
+            "Ismoving": False,
+            "Maxincrement": Config.maxincrement,
+            "Tempcomp": Config.temp_comp,
+            "Tempcompavailable": Config.tempcompavailable,            
+            "Position": 0,
+            "Speed": Config.speed,
             }
 
         # self.device = FocuserDriver(logger)
+        self.reachable = self.ping_server()
         self.device = Focuser(logger)
         try:
             self.device.connected = True
@@ -118,7 +121,7 @@ class App():
         except Exception as e:
             self.logger.error(f'Error closing Puller connection: {str(e)}')
         
-        
+        self.device.disconnect()
         self.context.destroy()
         self.context = None
 
@@ -141,20 +144,19 @@ class App():
     
     def ping_server(self):
         """ping server"""
-        timeout=.5
         try:
-            socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((Config.device_ip, Config.device_port))
-        except OSError:
-            return False
-        else:
             s.close()
             return True
+        except Exception as e:
+            print(e)
+            return False           
 
     def handle_home(self):
         try:
             res = self.device.home()
+            time.sleep(.2)
             self._homing = True
             self._is_moving = True
             self.logger.info(f'Device Homing {res}')
@@ -182,6 +184,7 @@ class App():
         try:
             self.device.move(int(pos))
             self.logger.info(f'Moving to {pos} position')
+            time.sleep(.2)
             self._is_moving = True
         except Exception as e:
             self.status["Error"] = str(e)
@@ -209,13 +212,11 @@ class App():
         self._client_id = 0
         self.start_server()
         self.stop_var = False
+        self.status["Connected"] = self.device.connected
         while not self.stop_var:
-            if round(time.time()) % 15 == 0:
-                self.ping_server()
-                self.pub_status()
-
+            t0 = time.time()
             if self.device and self.device.connected and self.poller:
-                socks = dict(self.poller.poll(10))
+                socks = dict(self.poller.poll(50))
                 if socks.get(self.puller) == zmq.POLLIN:
                     msg_pull = self.puller.recv_string()
                     try:
@@ -229,7 +230,6 @@ class App():
                     try:
                         self.status["Error"] = ''
                         command_handlers = {
-                            'PING': self.ping_server,
                             'HOME': self.handle_home,
                             'HALT': self.handle_halt,
                             'CONNECT': self.handle_connect,
@@ -264,5 +264,6 @@ class App():
                 
                 self.status["ClientID"] = self._client_id
                 self.update_status()
+            
+            self.connection_speed = ("interval: ", round(time.time()-t0, 3))
 
-            time.sleep(0)

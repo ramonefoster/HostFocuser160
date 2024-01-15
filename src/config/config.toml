@@ -7,16 +7,18 @@ description = 'Interface for Perkin-Elmer Focuser'
 startup = true
 
 [Device]
+absolute = true
 deviceType = 'Focuser'
 deviceID = '3285e9af-8d1d-4f9d-b368-d129d8e9a24b' # https://guidgenerator.com/online-guid-generator.aspx
-absolute = true
-max_step = 84000
-maxincrement = 0
-stepsize = 0
-tempcompavailable = false
-temp_comp = false
 device_ip = '192.168.1.223'
 device_port = 5001
+max_step = 84000
+maxincrement = 0
+tempcompavailable = false
+temp_comp = false
+speed = 0
+stepsize = 0
+
 
 [Network]
 ip_address = '192.168.1.100'

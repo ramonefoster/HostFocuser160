@@ -17,6 +17,8 @@ class FocuserDriver():
         self._lock = Lock()
         self.name: str = 'LNA Focuser'
         self.logger = logger
+
+        self.motor_socket = None
         
         self._step_size: float = 1.0
         
@@ -71,10 +73,8 @@ class FocuserDriver():
 
             while retries < max_retries and not connected_successfully:
                 try:
-                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-                        # client_socket.setblocking(False)
-                        print((Config.device_ip, Config.device_port))
-                        client_socket.connect((Config.device_ip, Config.device_port))
+                    self.motor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.motor_socket.connect((Config.device_ip, Config.device_port))                    
                     time.sleep(0.1)
                     connected_successfully = True
                 except Exception as e:
@@ -102,7 +102,7 @@ class FocuserDriver():
         self._lock.acquire()
         if self._connected:
             try:
-                pass
+                self.motor_socket.close()
             except:
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
@@ -110,14 +110,10 @@ class FocuserDriver():
     def start(self, from_run: bool = False) -> None:
         print('[start]')
         self._lock.acquire()
-        print('[start] got lock')
         if from_run or self._stopped:
             self._stopped = False
-            print('[start] new timer')
             self._timer = Timer(self._interval, self._run)
-            print('[start] now start the timer')
             self._timer.start()
-            print('[start] timer started')
             self._lock.release()
             print('[start] lock released')
         else:
@@ -125,7 +121,6 @@ class FocuserDriver():
             print('[start] lock released')
     
     def _run(self) -> None:
-        print('[_run] (tmr expired) get lock')
         if not self._is_moving:
             self._stopped = True
         print('[_run] lock released')
@@ -311,23 +306,15 @@ class FocuserDriver():
         retries = 0
         if self._connected:              
             while retries < max_retries:  
-                time.sleep(.1)        
                 try:   
-                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:                        
-                        client_socket.connect((Config.device_ip, Config.device_port))                     
-                        client_socket.sendall(bytes(f'{cmd}\x00', 'utf-8'))
-                        # Check if there is data available to read without blocking
-                        ready = select.select([client_socket], [], [], 0.1)  # Timeout set to 1 second
-                        if ready[0]:
-                            response = client_socket.recv(1024)                         
-                            return response.decode('utf-8').replace("\x00", "")  
-                    self.logger.error(f"[Device] Connection timeout")
-                    return "Connection Timeout"  # No response received within the timeout
+                    self.motor_socket.sendall(bytes(f'{cmd}\x00', 'utf-8'))
+                    response = self.motor_socket.recv(1024)
+                    return response.decode('utf-8').replace("\x00", "")                    
                 except Exception as e:
                     err = e
                 retries += 1
             self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
             print(f"Error writing ETH: {cmd}: {str(err)}")
-            return "Error"
+            return str(err)
         else:
             return "Not Connected"
