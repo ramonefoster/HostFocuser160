@@ -56,7 +56,7 @@ import zmq
 #   }"""
 
 # x = json_x.replace("'", "\"")
-# import json
+import json
 # y = json.loads(x)
 # print(y.get("CLIENT_ID"))
 
@@ -70,13 +70,34 @@ status = {
             "error": '',
             "connected": False,
             "homing": False,
-            "athome": False
+            "athome": False,
+            "teste": {"cmd": 2323}
             }
 
 print(status)
-import time
+# import time
+# while True:
+#   print(round(time.time()%15))
+#   if round(time.time()%15) == 0:
+#      print("x")
+#   time.sleep(1)
+
+# y = json.loads(status)
+x = status.get("teste")
+print(x.get("cmd"))
+
+import zmq, time
+context = zmq.Context()  
+sub = context.socket(zmq.PUB)
+sub.bind(f"tcp://200.131.64.237:7007")
+
+topics_to_subscribe = ''
+
+# sub.setsockopt_string(zmq.SUBSCRIBE, topics_to_subscribe)
+print("Ruuning SUB")
 while True:
-  print(round(time.time()%15))
-  if round(time.time()%15) == 0:
-     print("x")
-  time.sleep(1)
+    t0 = time.time()
+    st = """{"Absolute": true, "Maxincrement": 0, "Tempcomp": false, "Tempcompavailable": false, "Ismoving": false, "Position": 822, "Error": "", "Connected": true, "Homing": false, "Initialized": false, "ClientID": 0}"""
+    x = sub.send_string(st)
+    print("interval: ", round(time.time()-t0, 3))
+    print(x)

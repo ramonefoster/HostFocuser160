@@ -276,7 +276,7 @@ border-radius: 10px;</string>
      <x>0</x>
      <y>0</y>
      <width>240</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSetup">
@@ -285,12 +285,24 @@ border-radius: 10px;</string>
     </property>
     <addaction name="actionSettings"/>
    </widget>
+   <widget class="QMenu" name="menuTests">
+    <property name="title">
+     <string>Tests</string>
+    </property>
+    <addaction name="actionClient_Simulator"/>
+   </widget>
    <addaction name="menuSetup"/>
+   <addaction name="menuTests"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionClient_Simulator">
+   <property name="text">
+    <string>Client Simulator</string>
    </property>
   </action>
  </widget>

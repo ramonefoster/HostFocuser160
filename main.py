@@ -18,6 +18,7 @@ from threading import Thread
 from src.core.app import App
 from src.core.log import init_logging
 from src.core.config import Config
+from misc.client_sample import ClientSimulator
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -27,14 +28,10 @@ def resource_path(relative_path):
 main_ui_path = resource_path('assets/main.ui')
 icon_tray = resource_path('assets/icon.png')
 
-print(main_ui_path, icon_tray)
-Ui_MainWindow, QtBaseClass = uic.loadUiType(main_ui_path)
-
-class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
+class FocuserOPD(QtWidgets.QMainWindow):
     def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
-        Ui_MainWindow.__init__(self)
-        self.setupUi(self)
+        super(FocuserOPD, self).__init__()
+        uic.loadUi(main_ui_path, self)
 
         self.control = App(logger)
 
@@ -48,7 +45,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         dock_y = main_window_geometry.y()
         
         self.lblIP.setText(f"IP: {self.control.ip_address}")
-        self.lblPort.setText(f"{self.control.port_pub}, {self.control.port_pull}, {self.control.port_rep}")
+        self.lblPort.setText(f"PUB {self.control.port_pub}, PULL {self.control.port_pull}")
 
         # LOG FILE
         self.log_text_edit = QtWidgets.QTextEdit()  # Widget to display log
@@ -86,6 +83,8 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnStop.clicked.connect(self.stop)  
         self.actionSettings.triggered.connect(self.toggle_config_view)
         self.btnHide.clicked.connect(self.minimize_to_tray)
+        self.actionClient_Simulator.triggered.connect(self.run_simulator)
+        
         # Create a system tray icon
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon(icon_tray))  # Replace 'icon.png' with your icon file
@@ -124,6 +123,10 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         if reason == QSystemTrayIcon.DoubleClick:
             self.restore_from_tray()
     
+    def run_simulator(self):
+        self.second_window = ClientSimulator()
+        self.second_window.show()
+    
     def start(self):
         if self.run_thread and self.run_thread.is_alive():
             print("Still Alive")
@@ -136,7 +139,7 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.run_thread and self.run_thread.is_alive():
             self.run_thread.join()
     
-    def toggle_config_view(self):   
+    def toggle_config_view(self):
         self.read_config_file(self.config_file)
         self.conf_dock_widget.show()
 
@@ -176,23 +179,23 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def update(self):        
         status = self.control.status
-        con = status["connected"]
-        # if round(time.time(), 0)%33 == 0:
-        #     self.ping()
+        con = status["Connected"]
+        
         if self.run_thread and self.run_thread.is_alive():
             self.statusBar().setStyleSheet("background-color: green")
         else:
             self.statusBar().setStyleSheet("background-color: indianred")
         if con:
-            self.statusBar().showMessage("Client Connected")
+            self.statusBar().showMessage("Device Socket Connected")
         else:
-            self.statusBar().showMessage("Client Disconnected")
-        self.lblPos.setText(str(status["position"]))
-        if len(status["error"]) > 1:
+            self.statusBar().showMessage("Device Socket Disconnected")
+        self.lblPos.setText(str(status["Position"]))
+        if len(status["Error"]) > 1:
+            self.lblErr.setToolTip(status["Error"])
             self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")
         else:
             self.lblErr.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
-        if status["ismoving"]:
+        if status["Ismoving"]:
             self.lblMov.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
             self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
@@ -212,12 +215,11 @@ class FocuserOPD(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
     logger = init_logging()
-    main_app = QtWidgets.QApplication(sys.argv)
-    window = FocuserOPD()
-    
-    window.show()
-    sys.exit(main_app.exec_())
+    app = QtWidgets.QApplication([])
 
-    
+    main_window1 = FocuserOPD()
+    main_window1.show()
+
+    sys.exit(app.exec_()) 
     
     

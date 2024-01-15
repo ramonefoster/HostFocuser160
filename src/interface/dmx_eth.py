@@ -39,6 +39,7 @@ class FocuserDriver():
         self._stopped = True
         self._homing = False
         self._at_home = False
+        self._initialized = False
 
         self._timeout = 1
 
@@ -71,6 +72,8 @@ class FocuserDriver():
             while retries < max_retries and not connected_successfully:
                 try:
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                        # client_socket.setblocking(False)
+                        print((Config.device_ip, Config.device_port))
                         client_socket.connect((Config.device_ip, Config.device_port))
                     time.sleep(0.1)
                     connected_successfully = True
@@ -205,6 +208,17 @@ class FocuserDriver():
             self._homing = False
         self._lock.release()
         return self._homing
+    
+    @property
+    def initialized(self) -> bool:
+        self._lock.acquire()
+        x = self._write("V44", max_retries=3)
+        if "64" in x:
+            self._initialized = True
+        else:
+            self._initialized = False
+        self._lock.release()
+        return self._initialized
 
     @property
     def get_status(self) -> str:
@@ -284,9 +298,9 @@ class FocuserDriver():
         self._lock.release()      
     
     def Halt(self) -> None:        
-        resp_stop = self._write("STOP", 3)
+        resp_stop = self._write("STOP", 5)
         if resp_stop == 'OK':
-            resp_stop = self._write("GS0=0", 3)
+            resp_stop = self._write("GS0=0", 5)
             if resp_stop == 'OK':
                 self.logger.info('[Device] halt')
                 self.stop()
