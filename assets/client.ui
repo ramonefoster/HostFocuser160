@@ -69,7 +69,7 @@
      <string notr="true">background-color: rgb(222, 222, 222);</string>
     </property>
     <property name="text">
-     <string>\/</string>
+     <string>IN</string>
     </property>
     <property name="icon">
      <iconset>
@@ -152,7 +152,7 @@ QProgressBar { color: indianred; }</string>
      <string notr="true">background-color: rgb(222, 222, 222);</string>
     </property>
     <property name="text">
-     <string>/\</string>
+     <string>OUT</string>
     </property>
     <property name="icon">
      <iconset>

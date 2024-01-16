@@ -64,6 +64,12 @@ class FocuserDriver():
         return res
     @connected.setter
     def connected(self, connected: bool, max_retries=3, delay=.1):
+        """Connects the device and open socket connection
+        Args:
+            connected (bool): Sets the connected state
+            max_retries (int): Number os tries if first one fail
+            delay (float): Small delay, in seconds, to wait after a try
+        """
         self._lock.acquire()
         self._connected = connected
         if connected:
@@ -75,7 +81,7 @@ class FocuserDriver():
                 try:
                     self.motor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.motor_socket.connect((Config.device_ip, Config.device_port))                    
-                    time.sleep(0.1)
+                    time.sleep(delay)
                     connected_successfully = True
                 except Exception as e:
                     self.logger.error(f'Connection attempt {retries + 1} failed: {e}')
@@ -99,6 +105,7 @@ class FocuserDriver():
             self.logger.info('[Disconnected]')
     
     def disconnect(self):
+        """Disconnects device and close socket"""
         self._lock.acquire()
         if self._connected:
             try:
@@ -158,7 +165,8 @@ class FocuserDriver():
         self._lock.release()
 
     @property
-    def position(self) -> int:          
+    def position(self) -> int:    
+        """Device enconders position"""      
         try:
             self._lock.acquire()
             step = int(self._write("EX", max_retries=3)) 
@@ -180,6 +188,7 @@ class FocuserDriver():
     
     @property
     def is_moving(self) -> bool:
+        """Checks if device is moving"""
         self._lock.acquire()
         x = self._write("V46", max_retries=3)
         if "1" in x:
@@ -195,6 +204,7 @@ class FocuserDriver():
 
     @property
     def homing(self) -> bool:
+        """Check if INIT routine is being executed"""
         self._lock.acquire()
         x = self._write("V44", max_retries=3)
         if "0" in x:
@@ -206,6 +216,7 @@ class FocuserDriver():
     
     @property
     def initialized(self) -> bool:
+        """Checks if initialization was previously executed"""
         self._lock.acquire()
         x = self._write("V44", max_retries=3)
         if "64" in x:
@@ -251,6 +262,12 @@ class FocuserDriver():
         return res
     
     def home(self):
+        """Executes the INIT routine        
+        Returns: 
+            Device response or Error message
+        Raises:
+            RuntimeError if device is busy
+        """      
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
 
@@ -263,10 +280,18 @@ class FocuserDriver():
         self.logger.error('[Device] home: Failed after retries')
         return res      
 
-    def move(self, position: int):        
+    def move(self, position: int):  
+        """Moves device position to the given position
+        Args:  
+            position (int): Number of steps.
+        Returns: 
+            Device response or Error message
+        Raises:
+            RuntimeError if Invalid input or if device is busy
+        """      
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
-        if 0 > position > self._max_step:
+        if 0 >= position >= self._max_step:
             raise RuntimeError('Invalid Steps')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
@@ -292,7 +317,8 @@ class FocuserDriver():
         self._timer = None
         self._lock.release()      
     
-    def Halt(self) -> None:        
+    def Halt(self) -> None:   
+        """Send command STOP and stops main program with GS0=0 subroutine"""     
         resp_stop = self._write("STOP", 5)
         if resp_stop == 'OK':
             resp_stop = self._write("GS0=0", 5)
@@ -303,6 +329,13 @@ class FocuserDriver():
         return False        
     
     def _write(self, cmd, max_retries = 0):
+        """Send commands to device socket.
+        Args:  
+            cmd (str): Command.
+            max_retries (int): Number of retries if first one fails
+        Returns: 
+            Device response or Error message
+        """
         retries = 0
         if self._connected:              
             while retries < max_retries:  

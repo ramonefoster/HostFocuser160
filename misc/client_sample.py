@@ -26,6 +26,8 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.btnConnect.clicked.connect(self.connect)
         self.btnHalt.clicked.connect(self.halt)
         self.btnHome.clicked.connect(self.home)
+        self.btnUp.clicked.connect(self.move_out)
+        self.btnDown.clicked.connect(self.move_in)
 
         self.context = zmq.Context()       
 
@@ -89,6 +91,16 @@ class ClientSimulator(QtWidgets.QMainWindow):
         if not self.is_moving:
             pos = self.txtMov.text()
             self._msg_json["Action"]["CMD"] = F"MOVE={pos}"
+            self.pusher.send_string(json.dumps(self._msg_json))
+    
+    def move_in(self):
+        if not self.is_moving:
+            self._msg_json["Action"]["CMD"] = F"FOCUSIN"
+            self.pusher.send_string(json.dumps(self._msg_json))
+    
+    def move_out(self):
+        if not self.is_moving:
+            self._msg_json["Action"]["CMD"] = F"FOCUSOUT"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def get_status(self):

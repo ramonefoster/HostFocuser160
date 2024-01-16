@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>240</width>
-    <height>350</height>
+    <height>405</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>270</y>
+      <y>330</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -34,7 +34,7 @@
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>270</y>
+      <y>330</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -50,7 +50,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>240</y>
+      <y>300</y>
       <width>201</width>
       <height>23</height>
      </rect>
@@ -102,9 +102,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>70</y>
       <width>211</width>
-      <height>91</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -142,12 +142,28 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="lblCommSpeed">
+     <property name="geometry">
+      <rect>
+       <x>16</x>
+       <y>90</y>
+       <width>181</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>150</y>
+      <y>200</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -163,7 +179,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>150</y>
+      <y>200</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -179,7 +195,7 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>150</y>
+      <y>200</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -195,7 +211,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>170</y>
+      <y>220</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -217,7 +233,7 @@
     <property name="geometry">
      <rect>
       <x>115</x>
-      <y>170</y>
+      <y>220</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -237,7 +253,7 @@ border-radius: 10px;</string>
     <property name="geometry">
      <rect>
       <x>186</x>
-      <y>170</y>
+      <y>220</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -257,7 +273,7 @@ border-radius: 10px;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>210</y>
+      <y>40</y>
       <width>191</width>
       <height>20</height>
      </rect>
@@ -267,6 +283,50 @@ border-radius: 10px;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>260</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ClientID:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="txtClientID">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>260</y>
+      <width>113</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>Current Client</string>
+    </property>
+    <property name="frame">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

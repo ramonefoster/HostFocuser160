@@ -112,22 +112,27 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.start()
     
     def minimize_to_tray(self):
+        """Minimize to tray"""
         self.hide()  
         self.tray_icon.show() 
 
     def restore_from_tray(self):
+        """Restore from Tray"""
         self.show()  
         self.tray_icon.hide()
     
     def tray_activated(self, reason):
+        """Restore from double click on icon"""
         if reason == QSystemTrayIcon.DoubleClick:
             self.restore_from_tray()
     
     def run_simulator(self):
+        """Opens the simulator window"""
         self.second_window = ClientSimulator()
         self.second_window.show()
     
     def start(self):
+        """Start server"""
         if self.run_thread and self.run_thread.is_alive():
             print("Still Alive")
         self.run_thread = Thread(target = self.control.run)
@@ -135,25 +140,30 @@ class FocuserOPD(QtWidgets.QMainWindow):
         # self.run_thread.daemon = True
     
     def stop(self):
+        """Stops main program and the main loop at Application interface with Device"""
         self.control.disconnect()
         if self.run_thread and self.run_thread.is_alive():
             self.run_thread.join()
     
     def toggle_config_view(self):
+        """Shows config side window"""
         self.read_config_file(self.config_file)
         self.conf_dock_widget.show()
 
     def read_config_file(self, file_path):
+        """Reads config file"""
         with open(file_path, "r") as file:
             log_content = file.read()
             self.conf_text_edit.setPlainText(log_content)
     
     def save_config_file(self):
+        """Save modified config in config file"""
         content_to_save = self.conf_text_edit.toPlainText()        
         with open(self.config_file, "w") as file:
             file.write(content_to_save)
 
     def toggle_log_view(self, state):
+        """Shows LOG side window"""
         if state == Qt.Checked:
             
             if self.log_file:
@@ -163,21 +173,20 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.log_dock_widget.hide()
 
     def read_log_file(self, file_path):
+        """Open LOG file"""
         with open(file_path, "r") as file:
             log_content = file.read()
             self.log_text_edit.setPlainText(log_content)
-        
-        # self.update_log_timer = QTimer(self)
-        # self.update_log_timer.timeout.connect(lambda: self.read_log_file(file_path))
-        # self.update_log_timer.start(20000)
-    
+           
     def ping(self):
+        """Checks if device is reachable"""
         if self.control.reachable:
             self.lblPing.setText("Device is Reachable")
         else:
             self.lblPing.setText("Device is NOT Reachable")
         
-    def update(self):        
+    def update(self):   
+        """Main loop and UI manager"""     
         status = self.control.status
         con = status["Connected"]
         
@@ -190,6 +199,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
         else:
             self.statusBar().showMessage("Device Socket Disconnected")
         self.lblPos.setText(str(status["Position"]))
+        self.txtClientID.setText(str(status["ClientID"]))
+        self.lblCommSpeed.setText(str(self.control.connection_speed))
         if len(status["Error"]) > 1:
             self.lblErr.setToolTip(status["Error"])
             self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")

@@ -52,6 +52,7 @@ class App():
         self.status = {
             "Absolute": Config.absolute,
             "ClientID": 0,
+            "CMD": '',
             "Connected": False,
             "Error": '',
             "Homing": False,
@@ -65,22 +66,32 @@ class App():
             }
 
         # self.device = FocuserDriver(logger)
-        self.reachable = self.ping_server()
+        _try = 0
+        for _try in range(5):
+            self.reachable = self.ping_server()
+            if self.reachable:
+                break
+            _try += 1
+
         self.device = Focuser(logger)
-        try:
-            self.device.connected = True
-            self._position =self.device.position
-            self.status["Position"] = self._position
-        except Exception as e:
-            print(e)
+        if self.reachable:
+            try:
+                self.device.connected = True
+                self._position =self.device.position
+                self.status["Position"] = self._position
+                self.status["Initialized"] = self.device.initialized
+            except Exception as e:
+                print(e)
 
         self.start_server()  
 
-    def start_server(self):  
+    def start_server(self): 
+        """ Starts Server ZeroMQ, creating context 
+        then binding PUB and PULL sockets"""
+
         if self.context:    
             return  
-        """ Starts Server ZeroMQ"""
-        # ZeroMQ Context
+        
         self.context = zmq.Context()
         print('Context Created')
 
@@ -110,6 +121,7 @@ class App():
         self.logger.info(f'Server Started')
     
     def close_connection(self):
+        """Unbind all sockets and destroy context"""
         try:
             self.publisher.unbind(f"tcp://{self.ip_address}:{self.port_pub}")
             self.logger.info(f'Disconnecting Publisher')
@@ -126,48 +138,61 @@ class App():
         self.context = None
 
     def disconnect(self):
+        """Stops main loop and close all sockets"""
         self.stop()
         self.close_connection()
 
         self.logger.info(f'Server Disconnecting')
     
     def pub_status(self):
+        """Publishes status via ZeroMQ"""
         json_string = json.dumps(self.status)        
         self.publisher.send_string(json_string)
         self.logger.info(f'Status published: {self.status}')
     
     def stop(self):
+        """Stop main loop and unregister zmq.POLL"""
         self.stop_var = True
         if self.poller:
             self.poller.unregister(self.puller)
             self.poller = None
     
     def ping_server(self):
-        """ping server"""
+        """Check if motor is reachable
+        ::returns:: bool
+        """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
             s.connect((Config.device_ip, Config.device_port))
             s.close()
+            time.sleep(.2)
             return True
         except Exception as e:
             print(e)
             return False           
 
     def handle_home(self):
+        """Executes the INIT routine, which means moving motor axis to the
+        microswitches and then removing the backlash until the encoder return 0"""
         try:
             res = self.device.home()
             time.sleep(.2)
-            self._homing = True
-            self._is_moving = True
+            if res == "OK":
+                self._homing = True
+                self._is_moving = True
             self.logger.info(f'Device Homing {res}')
         except Exception as e:
+            print(e)
             self.status["Error"] = str(e)
             self.logger.error(f'Homing {e}')
             self.pub_status()
 
     def handle_halt(self):
+        """Stops the motor"""
         if self.device.Halt():
-            self._is_moving = True
+            time.sleep(.2)
+            self._is_moving = True # set _is_moving to true so the main loop can realy check if the motor is moving or not
             self.logger.info(f'Device Stopped')
         else:
             self.logger.info(f'Halt Fail')
@@ -181,6 +206,9 @@ class App():
         self.logger.info(f'Device Disconnected')
 
     def handle_move(self, pos):
+        """Move focuser to a position
+        ::params:: position (integer)
+        """
         try:
             self.device.move(int(pos))
             self.logger.info(f'Moving to {pos} position')
@@ -192,6 +220,8 @@ class App():
             self.pub_status()
 
     def update_status(self):
+        """Verifies if there is a change in state variables, 
+        such as _is_moving, _homing and _position and publishes in ZeroMQ"""
         if self._is_moving != self.previous_is_mov:
             self.status["Ismoving"] = self._is_moving
             self.previous_is_mov = self._is_moving
@@ -207,6 +237,9 @@ class App():
             self.status["Position"] = self._position
             self.previous_pos = self._position
             self.pub_status()
+        
+        if self._is_moving and self._homing:
+            self.status["ClientID"] = 0
 
     def run(self):
         self._client_id = 0
@@ -223,6 +256,7 @@ class App():
                         msg_pull = json.loads(msg_pull)
                         action = msg_pull.get("Action")
                         cmd = action.get("CMD")
+                        self.status["CMD"] = cmd
                         self._client_id = msg_pull.get("ClientID") 
                     except:
                         self.status["Error"] = "Invalid JSON command."
@@ -240,10 +274,16 @@ class App():
                         if "MOVE=" in cmd:
                             self.handle_move(cmd[5:])
                         
+                        if "FOCUSIN" in cmd:
+                            self.handle_move(1)
+                        
+                        if "FOCUSOUT" in cmd:
+                            self.handle_move(Config.max_step)
+                        
                         if "HALT" in cmd and self._client_id == self.status["ClientID"]:
                             self.handle_halt()
 
-                        if cmd in command_handlers and self._client_id == 0:
+                        if cmd in command_handlers and self.status["ClientID"] == 0:
                             command_handlers[cmd]()
 
                         self.status["Connected"] = self.device.connected
@@ -264,6 +304,7 @@ class App():
                 
                 self.status["ClientID"] = self._client_id
                 self.update_status()
+                self.status["CMD"] = ''
             
-            self.connection_speed = ("interval: ", round(time.time()-t0, 3))
+            self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"
 
