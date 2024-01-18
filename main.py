@@ -188,7 +188,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
     def update(self):   
         """Main loop and UI manager"""     
         status = self.control.status
-        con = status["Connected"]
+        con = status["connected"]
         
         if self.run_thread and self.run_thread.is_alive():
             self.statusBar().setStyleSheet("background-color: green")
@@ -198,15 +198,15 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.statusBar().showMessage("Device Socket Connected")
         else:
             self.statusBar().showMessage("Device Socket Disconnected")
-        self.lblPos.setText(str(status["Position"]))
-        self.txtClientID.setText(str(status["ClientID"]))
+        self.lblPos.setText(str(status["position"]))
+        self.txtClientID.setText(str(status["clientId"]))
         self.lblCommSpeed.setText(str(self.control.connection_speed))
-        if len(status["Error"]) > 1:
-            self.lblErr.setToolTip(status["Error"])
+        if len(status["error"]) > 1:
+            self.lblErr.setToolTip(status["error"])
             self.lblErr.setStyleSheet("background-color: indianred; border-radius: 10px;")
         else:
             self.lblErr.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
-        if status["Ismoving"]:
+        if status["isMoving"]:
             self.lblMov.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
             self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")

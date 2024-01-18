@@ -105,7 +105,7 @@ QProgressBar { color: indianred; }</string>
      <number>-10</number>
     </property>
     <property name="maximum">
-     <number>1500</number>
+     <number>21000</number>
     </property>
     <property name="value">
      <number>0</number>

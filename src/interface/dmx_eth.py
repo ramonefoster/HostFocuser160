@@ -42,11 +42,12 @@ class FocuserDriver():
         self._homing = False
         self._at_home = False
         self._initialized = False
+        self._alarm = 0
 
         self._timeout = 1
 
         self._timer: Timer = None
-        self._interval: float = 1.0 / self._steps_per_sec
+        self._interval: float = .2
 
         self._model_step = np.array([0, 1000, 1500, 2500, 4000, 5900, 8500, 
                                      12000, 15000, 18000, 22000, 27000, 32000, 
@@ -170,14 +171,15 @@ class FocuserDriver():
         try:
             self._lock.acquire()
             step = int(self._write("EX", max_retries=3)) 
-            if step >= 0:
-                conv_position = int(self._interp_func(step))
-            elif step < 0:
-                conv_position = round(step*0.0162)
-                self._homing = True
-            else:
-                return self._last_pos
-            self._position = conv_position
+            # if step >= 0:
+            #     conv_position = int(self._interp_func(step))
+            # elif step < 0:
+            #     conv_position = round(step*0.0162)
+            #     self._homing = True
+            # else:
+            #     return self._last_pos
+            # self._position = conv_position
+            self._position = round(step/47.778, 2)
             self._last_pos = self._position
             self._lock.release()
             return self._position
@@ -261,6 +263,19 @@ class FocuserDriver():
         self._lock.release()
         return res
     
+    @property
+    def alarm(self) -> int:
+        res = self._write("ALM", max_retries=3)
+        try:
+            self._alarm = int(res)
+            if self._alarm == '1':
+                self.logger.info('[Device] Temperature Alarm ON')
+        except Exception as e: 
+            self._alarm = 0
+            self.logger.error(f'[Device] Alarm Error {str(e)}')
+        
+        return self._alarm
+
     def home(self):
         """Executes the INIT routine        
         Returns: 
@@ -276,6 +291,10 @@ class FocuserDriver():
             self.start()
             self.logger.info('[Device] home: Success')
             return res  
+        else:
+            alarm = self.alarm()
+            if alarm == 1:
+                self.logger.error('[Device] home: Failed and Alarm flag is up')
 
         self.logger.error('[Device] home: Failed after retries')
         return res      
@@ -289,9 +308,10 @@ class FocuserDriver():
         Raises:
             RuntimeError if Invalid input or if device is busy
         """      
+        pos_conv = int(round((47.778 * position), 0))
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
-        if 0 >= position >= self._max_step:
+        if 0 >= pos_conv >= self._max_step:
             raise RuntimeError('Invalid Steps')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
@@ -303,9 +323,34 @@ class FocuserDriver():
                 self.start() 
                 return
             else:
+                alarm = self.alarm()
+                if alarm == 1:
+                    self.logger.error('[Device] Move Failed and Alarm flag is up')
                 raise RuntimeError(f'Error: {resp}')
         else:
-            raise RuntimeError(f'Error: {resp}')            
+            self.alarm()
+            raise RuntimeError(f'Error: {resp}') 
+
+    def speed(self, vel: int):  
+        """Sets the speed of the motor
+        Args:  
+            vel (int): speed value in rpm.
+        Returns: 
+            Device response or Error message
+        Raises:
+            RuntimeError if Invalid input or if device is busy
+        """      
+        if self._is_moving:
+            raise RuntimeError('Cannot set speed while the focuser is moving')
+        if 0 > vel >= self._max_speed:
+            raise RuntimeError('Invalid Steps')        
+        resp = self._write(f"V20={vel}", max_retries=3)
+        if "OK" in resp: 
+            self.logger.info(f'[Device] speed={str(vel)}')
+            self.start() 
+            return            
+        else:
+            raise RuntimeError(f'Error: {resp}')           
 
     def stop(self) -> None:
         self._lock.acquire()
@@ -320,12 +365,10 @@ class FocuserDriver():
     def Halt(self) -> None:   
         """Send command STOP and stops main program with GS0=0 subroutine"""     
         resp_stop = self._write("STOP", 5)
-        if resp_stop == 'OK':
-            resp_stop = self._write("GS0=0", 5)
-            if resp_stop == 'OK':
-                self.logger.info('[Device] halt')
-                self.stop()
-                return True  # Command executed successfully 
+        if resp_stop == 'OK':            
+            self.logger.info('[Device] halt')
+            self.stop()
+            return True  # Command executed successfully 
         return False        
     
     def _write(self, cmd, max_retries = 0):

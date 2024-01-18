@@ -16,6 +16,7 @@ import zmq
 import json
 import socket
 import os
+from datetime import datetime
 
 from src.core.config import Config
 
@@ -50,40 +51,45 @@ class App():
 
         # Status Message
         self.status = {
-            "Absolute": Config.absolute,
-            "ClientID": 0,
-            "CMD": '',
-            "Connected": False,
-            "Error": '',
-            "Homing": False,
-            "Initialized": False,
-            "Ismoving": False,
-            "Maxincrement": Config.maxincrement,
-            "Tempcomp": Config.temp_comp,
-            "Tempcompavailable": Config.tempcompavailable,            
-            "Position": 0,
-            "Speed": Config.speed,
+            "absolute": Config.absolute,
+            "alarm": 0,
+            "clientId": 0,
+            "cmd": '',
+            "connected": False,
+            "error": '',
+            "homing": False,
+            "initialized": False,
+            "isMoving": False,
+            "maxStep": Config.max_step,
+            "tempComp": Config.temp_comp,
+            "tempCompAvailable": Config.tempcompavailable,  
+            "timestamp": datetime.timestamp(datetime.now()),       
+            "position": 0,
+            "speed": Config.speed,
             }
 
         # self.device = FocuserDriver(logger)
+        
+        self.device = Focuser(self.logger)
+        self.reach_device()
+        self.start_server() 
+
+    def reach_device(self):
         _try = 0
         for _try in range(5):
             self.reachable = self.ping_server()
             if self.reachable:
                 break
             _try += 1
-
-        self.device = Focuser(logger)
+        
         if self.reachable:
             try:
                 self.device.connected = True
                 self._position =self.device.position
-                self.status["Position"] = self._position
-                self.status["Initialized"] = self.device.initialized
+                self.status["position"] = self._position
+                self.status["initialized"] = self.device.initialized
             except Exception as e:
-                print(e)
-
-        self.start_server()  
+                print(e) 
 
     def start_server(self): 
         """ Starts Server ZeroMQ, creating context 
@@ -101,7 +107,7 @@ class App():
             self.publisher.bind(f"tcp://{self.ip_address}:{self.port_pub}")
             print(f"Publisher binded to {self.ip_address}:{self.port_pub}")
         except Exception as e:
-            self.status["Error"] = f'{str(e)}'
+            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Publihser: {str(e)}')
             return
 
@@ -111,7 +117,7 @@ class App():
             self.puller.bind(f"tcp://{self.ip_address}:{self.port_pull}")
             print(f"Pull binded to {self.ip_address}:{self.port_pull}")
         except Exception as e:
-            self.status["Error"] = f'{str(e)}'
+            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Puller: {str(e)}')
             return
 
@@ -119,6 +125,7 @@ class App():
         self.poller = zmq.Poller()
         self.poller.register(self.puller, zmq.POLLIN)        
         self.logger.info(f'Server Started')
+        self.pub_status()
     
     def close_connection(self):
         """Unbind all sockets and destroy context"""
@@ -146,6 +153,7 @@ class App():
     
     def pub_status(self):
         """Publishes status via ZeroMQ"""
+        self.status["timestamp"] = round(datetime.timestamp(datetime.now()), 2)
         json_string = json.dumps(self.status)        
         self.publisher.send_string(json_string)
         self.logger.info(f'Status published: {self.status}')
@@ -156,6 +164,7 @@ class App():
         if self.poller:
             self.poller.unregister(self.puller)
             self.poller = None
+            time.sleep(.2)
     
     def ping_server(self):
         """Check if motor is reachable
@@ -163,7 +172,7 @@ class App():
         """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(1)
+            s.settimeout(.2)
             s.connect((Config.device_ip, Config.device_port))
             s.close()
             time.sleep(.2)
@@ -181,10 +190,13 @@ class App():
             if res == "OK":
                 self._homing = True
                 self._is_moving = True
+            else:
+                self.status["alarm"] = self.device.alarm()
             self.logger.info(f'Device Homing {res}')
         except Exception as e:
             print(e)
-            self.status["Error"] = str(e)
+            self.status["alarm"] = self.device.alarm()
+            self.status["error"] = str(e)
             self.logger.error(f'Homing {e}')
             self.pub_status()
 
@@ -195,7 +207,16 @@ class App():
             self._is_moving = True # set _is_moving to true so the main loop can realy check if the motor is moving or not
             self.logger.info(f'Device Stopped')
         else:
+            self.status["alarm"] = self.device.alarm()
             self.logger.info(f'Halt Fail')
+
+    def handle_speed(self, vel):
+        """Change the motor's speed"""
+        if self.device.speed(int(vel)):
+            time.sleep(.2)
+            self.logger.info(f'Speed changed')
+        else:
+            self.logger.info(f'Speed change Fail')
 
     def handle_connect(self):
         self.logger.info(f'Device Connected')
@@ -215,7 +236,8 @@ class App():
             time.sleep(.2)
             self._is_moving = True
         except Exception as e:
-            self.status["Error"] = str(e)
+            self.status["alarm"] = self.device.alarm()
+            self.status["error"] = str(e)
             self.logger.error(f'Moving {pos}: {str(e)}')
             self.pub_status()
 
@@ -223,29 +245,29 @@ class App():
         """Verifies if there is a change in state variables, 
         such as _is_moving, _homing and _position and publishes in ZeroMQ"""
         if self._is_moving != self.previous_is_mov:
-            self.status["Ismoving"] = self._is_moving
+            self.status["isMoving"] = self._is_moving
             self.previous_is_mov = self._is_moving
             self.pub_status()
 
         if self._homing != self.previous_homing:
-            self.status["Homing"] = self._homing
-            self.status["Initialized"] = self.device.initialized
+            self.status["homing"] = self._homing
+            self.status["initialized"] = self.device.initialized
             self.previous_homing = self._homing
             self.pub_status()
 
         if self._position != self.previous_pos:
-            self.status["Position"] = self._position
+            self.status["position"] = self._position
             self.previous_pos = self._position
             self.pub_status()
         
         if self._is_moving and self._homing:
-            self.status["ClientID"] = 0
+            self.status["clientId"] = 0
 
     def run(self):
         self._client_id = 0
         self.start_server()
         self.stop_var = False
-        self.status["Connected"] = self.device.connected
+        self.status["connected"] = self.device.connected
         while not self.stop_var:
             t0 = time.time()
             if self.device and self.device.connected and self.poller:
@@ -254,15 +276,16 @@ class App():
                     msg_pull = self.puller.recv_string()
                     try:
                         msg_pull = json.loads(msg_pull)
-                        action = msg_pull.get("Action")
-                        cmd = action.get("CMD")
-                        self.status["CMD"] = cmd
-                        self._client_id = msg_pull.get("ClientID") 
+                        action = msg_pull.get("action")
+                        cmd = action.get("cmd")
+                        self.status["cmd"] = msg_pull
+                        self._client_id = msg_pull.get("clientId") 
                     except:
-                        self.status["Error"] = "Invalid JSON command."
+                        self.status["error"] = "Invalid JSON command."
+                        continue
                               
                     try:
-                        self.status["Error"] = ''
+                        self.status["error"] = ''
                         command_handlers = {
                             'HOME': self.handle_home,
                             'HALT': self.handle_halt,
@@ -274,22 +297,25 @@ class App():
                         if "MOVE=" in cmd:
                             self.handle_move(cmd[5:])
                         
+                        if "SPEED=" in cmd:
+                            self.handle_speed(cmd[6:])
+                        
                         if "FOCUSIN" in cmd:
                             self.handle_move(1)
                         
                         if "FOCUSOUT" in cmd:
                             self.handle_move(Config.max_step)
                         
-                        if "HALT" in cmd and self._client_id == self.status["ClientID"]:
+                        if "HALT" in cmd and self._client_id == self.status["clientId"]:
                             self.handle_halt()
 
-                        if cmd in command_handlers and self.status["ClientID"] == 0:
+                        if cmd in command_handlers and self.status["clientId"] == 0:
                             command_handlers[cmd]()
 
-                        self.status["Connected"] = self.device.connected
+                        self.status["connected"] = self.device.connected
 
                     except Exception as e:
-                        self.status["Error"] = str(e)
+                        self.status["error"] = str(e)
                         self.pub_status()
                         self.logger.error(f'Error: {str(e)}')
 
@@ -298,13 +324,18 @@ class App():
                     self._position = self.device.position
                 if self._homing:                   
                     self._homing = self.device.homing 
-                    self._position = self.device.position 
+                    # self._position = self.device.position 
                 if not self._homing and not self._is_moving:
                     self._client_id = 0
+                    if round(time.time()%15 == 0):
+                        self.ping_server()
                 
-                self.status["ClientID"] = self._client_id
+                self.status["clientId"] = self._client_id
                 self.update_status()
-                self.status["CMD"] = ''
-            
+                self.status["cmd"] = ''
+                self.status["alarm"] = 0
+            else:
+                if round(time.time()%15 == 0):
+                    self.ping_server()
             self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"
 

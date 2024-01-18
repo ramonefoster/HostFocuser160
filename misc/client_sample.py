@@ -45,10 +45,10 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self._client_id = 666
 
         self._msg_json = {
-            "ClientID": self._client_id,
-            "TransactionID": 0,
-            "Device": "Focuser",
-            "Action": {"CMD": "STATUS"}
+            "clientId": self._client_id,
+            "transactionId": 0,
+            "device": "Focuser",
+            "action": {"cmd": "STATUS"}
             }
 
         self.start_client()
@@ -72,39 +72,39 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.pusher.connect(f"tcp://{Config.ip_address}:{Config.port_pull}")
     
     def connect(self):
-        self._msg_json["Action"]["CMD"] = "CONNECT"
+        self._msg_json["action"]["cmd"] = "CONNECT"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def home(self):
-        self._msg_json["Action"]["CMD"] = "HOME"
+        self._msg_json["action"]["cmd"] = "HOME"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def disconnect(self):
-        self._msg_json["Action"]["CMD"] = "DISCONNECT"
+        self._msg_json["action"]["cmd"] = "DISCONNECT"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def halt(self):
-        self._msg_json["Action"]["CMD"] = "HALT"
+        self._msg_json["action"]["cmd"] = "HALT"
         self.pusher.send_string(json.dumps(self._msg_json))
 
     def move_to(self):
         if not self.is_moving:
             pos = self.txtMov.text()
-            self._msg_json["Action"]["CMD"] = F"MOVE={pos}"
+            self._msg_json["action"]["cmd"] = F"MOVE={pos}"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def move_in(self):
         if not self.is_moving:
-            self._msg_json["Action"]["CMD"] = F"FOCUSIN"
+            self._msg_json["action"]["cmd"] = F"FOCUSIN"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def move_out(self):
         if not self.is_moving:
-            self._msg_json["Action"]["CMD"] = F"FOCUSOUT"
+            self._msg_json["action"]["cmd"] = F"FOCUSOUT"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def get_status(self):
-        self._msg_json["Action"]["CMD"] = "STATUS"
+        self._msg_json["action"]["cmd"] = "STATUS"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def update(self):
@@ -116,27 +116,27 @@ class ClientSimulator(QtWidgets.QMainWindow):
             self.txtStatus.setText(message)
             data = json.loads(message)
             try: 
-                self.position = int(data["Position"])                    
+                self.position = int(data["position"])                    
                 self.BarFocuser.setValue(int(self.position))
-                if int(data["ClientID"]) != 0:
+                if int(data["clientId"]) != 0:
                     self.statBusy.setStyleSheet("background-color: lightgreen")
-                    self.statBusy.setText(str(data["ClientID"]))
+                    self.statBusy.setText(str(data["clientId"]))
                 else:
                     self.statBusy.setText('')
                     self.statBusy.setStyleSheet("background-color: indianred")
-                if data["Homing"]:
+                if data["homing"]:
                     self.homing = True
                     self.statInit.setStyleSheet("background-color: lightgreen")
                 else:
                     self.homing = False
                     self.statInit.setStyleSheet("background-color: indianred") 
-                if data["Ismoving"]:
+                if data["isMoving"]:
                     self.is_moving = True
                     self.statMov.setStyleSheet("background-color: lightgreen")
                 else:
                     self.is_moving = False
                     self.statMov.setStyleSheet("background-color: indianred") 
-                if data["Connected"]:
+                if data["connected"]:
                     self.connected = True
                     self.statConn.setStyleSheet("background-color: lightgreen")
                 else:
