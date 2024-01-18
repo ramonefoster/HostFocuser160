@@ -260,8 +260,8 @@ class App():
             self.previous_pos = self._position
             self.pub_status()
         
-        if self._is_moving and self._homing:
-            self.status["clientId"] = 0
+        # if self._is_moving and self._homing:
+        #     self.status["clientId"] = 0
 
     def run(self):
         self._client_id = 0

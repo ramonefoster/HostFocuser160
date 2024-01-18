@@ -47,7 +47,7 @@ class FocuserDriver():
         self._timeout = 1
 
         self._timer: Timer = None
-        self._interval: float = .2
+        self._interval: float = .15
 
         self._model_step = np.array([0, 1000, 1500, 2500, 4000, 5900, 8500, 
                                      12000, 15000, 18000, 22000, 27000, 32000, 
@@ -115,26 +115,26 @@ class FocuserDriver():
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
     
-    def start(self, from_run: bool = False) -> None:
-        print('[start]')
-        self._lock.acquire()
-        if from_run or self._stopped:
-            self._stopped = False
-            self._timer = Timer(self._interval, self._run)
-            self._timer.start()
-            self._lock.release()
-            print('[start] lock released')
-        else:
-            self._lock.release()
-            print('[start] lock released')
+    # def start(self, from_run: bool = False) -> None:
+    #     print('[start]')
+    #     self._lock.acquire()
+    #     if from_run or self._stopped:
+    #         self._stopped = False
+    #         self._timer = Timer(self._interval, self._run)
+    #         self._timer.start()
+    #         self._lock.release()
+    #         print('[start] lock released')
+    #     else:
+    #         self._lock.release()
+    #         print('[start] lock released')
     
-    def _run(self) -> None:
-        if not self._is_moving:
-            self._stopped = True
-        print('[_run] lock released')
-        if self._is_moving:
-            print('[_run] more motion needed, start another timer interval')
-            self.start(from_run = True)
+    # def _run(self) -> None:
+    #     if not self._is_moving:
+    #         self._stopped = True
+    #     print('[_run] lock released')
+    #     if self._is_moving:
+    #         print('[_run] more motion needed, start another timer interval')
+    #         self.start(from_run = True)
     
     @property
     def temp(self):
@@ -288,7 +288,6 @@ class FocuserDriver():
 
         res = self._write("GS30", max_retries=3)
         if res == 'OK':
-            self.start()
             self.logger.info('[Device] home: Success')
             return res  
         else:
@@ -320,7 +319,6 @@ class FocuserDriver():
             resp = self._write(f"GS29", max_retries=3)
             if "OK" in resp:
                 self.logger.info(f'[Device] move={str(position)}')
-                self.start() 
                 return
             else:
                 alarm = self.alarm()
@@ -347,7 +345,6 @@ class FocuserDriver():
         resp = self._write(f"V20={vel}", max_retries=3)
         if "OK" in resp: 
             self.logger.info(f'[Device] speed={str(vel)}')
-            self.start() 
             return            
         else:
             raise RuntimeError(f'Error: {resp}')           
