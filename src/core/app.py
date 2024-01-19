@@ -41,6 +41,7 @@ class App():
         self.previous_is_mov = False
         self.previous_homing = False
         self.previous_pos = 0
+        self.last_ping_time = datetime.now()
 
         #variables for status request
         self._is_moving = False
@@ -48,12 +49,13 @@ class App():
         self._homing = False
         self._stopping = False
         self._client_id = 0
+        self.busy_id = 0
+        self._speed = Config.max_speed
 
         # Status Message
         self.status = {
             "absolute": Config.absolute,
             "alarm": 0,
-            "clientId": 0,
             "cmd": '',
             "connected": False,
             "error": '',
@@ -62,10 +64,11 @@ class App():
             "isMoving": False,
             "maxStep": Config.max_step,
             "tempComp": Config.temp_comp,
-            "tempCompAvailable": Config.tempcompavailable,  
+            "tempCompAvailable": Config.tempcompavailable, 
+            "temperature": 0, 
             "timestamp": datetime.timestamp(datetime.now()),       
             "position": 0,
-            "speed": Config.speed,
+            "maxSpeed": Config.max_speed,
             }
 
         # self.device = FocuserDriver(logger)
@@ -172,7 +175,7 @@ class App():
         """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(.2)
+            s.settimeout(.6)
             s.connect((Config.device_ip, Config.device_port))
             s.close()
             time.sleep(.2)
@@ -226,15 +229,24 @@ class App():
     def handle_disconnect(self):
         self.logger.info(f'Device Disconnected')
 
-    def handle_move(self, pos):
+    def handle_move(self, pos, vel):
         """Move focuser to a position
-        ::params:: position (integer)
-        """
+        Args: 
+            position (integer)
+            vel (integer)
+        """        
+        if vel > Config.max_speed:
+            vel = Config.max_speed
+        elif vel <=0:
+            vel = Config.max_speed
         try:
+            if vel != self._speed:
+                self.handle_speed(int(vel))
             self.device.move(int(pos))
             self.logger.info(f'Moving to {pos} position')
             time.sleep(.2)
             self._is_moving = True
+            self._speed = vel
         except Exception as e:
             self.status["alarm"] = self.device.alarm()
             self.status["error"] = str(e)
@@ -246,12 +258,12 @@ class App():
         such as _is_moving, _homing and _position and publishes in ZeroMQ"""
         if self._is_moving != self.previous_is_mov:
             self.status["isMoving"] = self._is_moving
-            self.previous_is_mov = self._is_moving
+            self.previous_is_mov = self._is_moving 
+            self.status["initialized"] = self.device.initialized           
             self.pub_status()
 
         if self._homing != self.previous_homing:
-            self.status["homing"] = self._homing
-            self.status["initialized"] = self.device.initialized
+            self.status["homing"] = self._homing            
             self.previous_homing = self._homing
             self.pub_status()
 
@@ -270,6 +282,7 @@ class App():
         self.status["connected"] = self.device.connected
         while not self.stop_var:
             t0 = time.time()
+            current_time = datetime.now()
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
                 if socks.get(self.puller) == zmq.POLLIN:
@@ -278,8 +291,9 @@ class App():
                         msg_pull = json.loads(msg_pull)
                         action = msg_pull.get("action")
                         cmd = action.get("cmd")
-                        self.status["cmd"] = msg_pull
-                        self._client_id = msg_pull.get("clientId") 
+                        if not 'STATUS' in cmd:
+                            self.status["cmd"] = msg_pull
+                            self._client_id = msg_pull.get("clientId") 
                     except:
                         self.status["error"] = "Invalid JSON command."
                         continue
@@ -295,21 +309,18 @@ class App():
                         }
 
                         if "MOVE=" in cmd:
-                            self.handle_move(cmd[5:])
+                            self.handle_move(cmd[5:], Config.max_speed)
                         
-                        if "SPEED=" in cmd:
-                            self.handle_speed(cmd[6:])
+                        if "FOCUSIN=" in cmd:
+                            self.handle_move(1, cmd[8:])
                         
-                        if "FOCUSIN" in cmd:
-                            self.handle_move(1)
+                        if "FOCUSOUT=" in cmd:
+                            self.handle_move(Config.max_step, cmd[9:])
                         
-                        if "FOCUSOUT" in cmd:
-                            self.handle_move(Config.max_step)
-                        
-                        if "HALT" in cmd and self._client_id == self.status["clientId"]:
+                        if "HALT" in cmd and self._client_id == self.busy_id:
                             self.handle_halt()
 
-                        if cmd in command_handlers and self.status["clientId"] == 0:
+                        if cmd in command_handlers and self.busy_id == 0:
                             command_handlers[cmd]()
 
                         self.status["connected"] = self.device.connected
@@ -327,15 +338,14 @@ class App():
                     # self._position = self.device.position 
                 if not self._homing and not self._is_moving:
                     self._client_id = 0
-                    if round(time.time()%15 == 0):
-                        self.ping_server()
+                    self.status["cmd"] = ''                    
                 
-                self.status["clientId"] = self._client_id
-                self.update_status()
-                self.status["cmd"] = ''
+                self.busy_id = self._client_id
+                self.update_status()                
                 self.status["alarm"] = 0
             else:
-                if round(time.time()%15 == 0):
-                    self.ping_server()
+                if (current_time - self.last_ping_time).total_seconds() >= 15:
+                    self.reachable = self.ping_server()
+                    self.last_ping_time = current_time
             self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"
 

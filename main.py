@@ -199,7 +199,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         else:
             self.statusBar().showMessage("Device Socket Disconnected")
         self.lblPos.setText(str(status["position"]))
-        self.txtClientID.setText(str(status["clientId"]))
+        self.txtClientID.setText(str(self.control.busy_id))
         self.lblCommSpeed.setText(str(self.control.connection_speed))
         if len(status["error"]) > 1:
             self.lblErr.setToolTip(status["error"])

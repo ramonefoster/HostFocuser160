@@ -43,18 +43,17 @@ def create_default_toml_file():
             "deviceID" : '3285e9af-8d1d-4f9d-b368-d129d8e9a24b', # https://guidgenerator.com/online-guid-generator.aspx
             "device_ip" : '192.168.1.250',
             "device_port" : 5001,
-            "max_step" : 50000,            
+            "max_step" : 1000000,            
             "maxincrement": 0,
             "tempcompavailable": False,
             "temp_comp" : False,
             "stepsize": 0,
-            "speed": 0,            
+            "max_speed": 0            
         },
         "Network" : {
                 "ip_address" : '127.0.0.1',
                 "port_pub" : 7001,
                 "port_pull" : 7002,
-                "port_rep" : 7003,
         },
         "Logging": {
                 "log_level" : 'INFO',
@@ -90,7 +89,6 @@ class Config:
     ip_address: str = get_toml('Network', 'ip_address')
     port_pub: int = get_toml('Network', 'port_pub')
     port_pull: int = get_toml('Network', 'port_pull')
-    port_rep: int = get_toml('Network', 'port_rep')
     # --------------
     # Device Section
     # --------------
@@ -100,7 +98,7 @@ class Config:
     max_step: int = get_toml('Device', 'max_step')
     temp_comp: bool = get_toml('Device', 'temp_comp')
     stepsize: int = get_toml('Device', 'stepsize')
-    speed: int = get_toml('Device', 'speed')
+    max_speed: int = get_toml('Device', 'max_speed')
     maxincrement: int = get_toml('Device', 'maxincrement')
     tempcompavailable: bool = get_toml('Device', 'tempcompavailable')
     # ---------------

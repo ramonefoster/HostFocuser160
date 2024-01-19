@@ -47,7 +47,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self._msg_json = {
             "clientId": self._client_id,
             "transactionId": 0,
-            "device": "Focuser",
+            "controller": "Focuser160",
             "action": {"cmd": "STATUS"}
             }
 
@@ -118,9 +118,9 @@ class ClientSimulator(QtWidgets.QMainWindow):
             try: 
                 self.position = int(data["position"])                    
                 self.BarFocuser.setValue(int(self.position))
-                if int(data["clientId"]) != 0:
+                if len(data["cmd"]) > 0:
                     self.statBusy.setStyleSheet("background-color: lightgreen")
-                    self.statBusy.setText(str(data["clientId"]))
+                    self.statBusy.setText(str(data["cmd"]["clientId"]))
                 else:
                     self.statBusy.setText('')
                     self.statBusy.setStyleSheet("background-color: indianred")

@@ -179,7 +179,7 @@ class FocuserDriver():
             # else:
             #     return self._last_pos
             # self._position = conv_position
-            self._position = round(step/47.778, 2)
+            self._position = int(round(step/47.778))
             self._last_pos = self._position
             self._lock.release()
             return self._position
@@ -193,11 +193,11 @@ class FocuserDriver():
         """Checks if device is moving"""
         self._lock.acquire()
         x = self._write("V46", max_retries=3)
-        if "1" in x:
+        if x == "1":
             self._is_moving = True
             self._lock.release()
             return self._is_moving
-        elif "0" in x:
+        elif x == "0":
             self._is_moving = False 
             self._lock.release()
             return self._is_moving          
@@ -301,7 +301,7 @@ class FocuserDriver():
     def move(self, position: int):  
         """Moves device position to the given position
         Args:  
-            position (int): Number of steps.
+            position (int): Value in microns.
         Returns: 
             Device response or Error message
         Raises:
@@ -314,11 +314,11 @@ class FocuserDriver():
             raise RuntimeError('Invalid Steps')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
-        resp = self._write(f"V20={position}", max_retries=3)
+        resp = self._write(f"V20={pos_conv}", max_retries=3)
         if "OK" in resp:            
             resp = self._write(f"GS29", max_retries=3)
             if "OK" in resp:
-                self.logger.info(f'[Device] move={str(position)}')
+                self.logger.info(f'[Device] move={str(pos_conv)}')
                 return
             else:
                 alarm = self.alarm()
@@ -338,16 +338,17 @@ class FocuserDriver():
         Raises:
             RuntimeError if Invalid input or if device is busy
         """      
-        if self._is_moving:
-            raise RuntimeError('Cannot set speed while the focuser is moving')
-        if 0 > vel >= self._max_speed:
-            raise RuntimeError('Invalid Steps')        
-        resp = self._write(f"V20={vel}", max_retries=3)
-        if "OK" in resp: 
-            self.logger.info(f'[Device] speed={str(vel)}')
-            return            
-        else:
-            raise RuntimeError(f'Error: {resp}')           
+        pass
+        # if self._is_moving:
+        #     raise RuntimeError('Cannot set speed while the focuser is moving')
+        # if 0 > vel >= self._max_speed:
+        #     raise RuntimeError('Invalid Steps')        
+        # resp = self._write(f"V20={vel}", max_retries=3)
+        # if "OK" in resp: 
+        #     self.logger.info(f'[Device] speed={str(vel)}')
+        #     return            
+        # else:
+        #     raise RuntimeError(f'Error: {resp}')           
 
     def stop(self) -> None:
         self._lock.acquire()
@@ -387,7 +388,9 @@ class FocuserDriver():
                     err = e
                 retries += 1
             self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
-            print(f"Error writing ETH: {cmd}: {str(err)}")
+            if "WinError" in err:
+                self._connected = False
+            # print(f"Error writing ETH: {cmd}: {str(err)}")
             return str(err)
         else:
             return "Not Connected"
