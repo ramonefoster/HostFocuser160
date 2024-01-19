@@ -308,16 +308,16 @@ class App():
                             'STATUS': self.pub_status,
                         }
 
-                        if "MOVE=" in cmd:
+                        if "MOVE=" in cmd and self.busy_id == 0:
                             self.handle_move(cmd[5:], Config.max_speed)
                         
-                        if "FOCUSIN=" in cmd:
+                        if "FOCUSIN=" in cmd and self.busy_id == 0:
                             self.handle_move(1, cmd[8:])
                         
-                        if "FOCUSOUT=" in cmd:
+                        if "FOCUSOUT=" in cmd and self.busy_id == 0:
                             self.handle_move(Config.max_step, cmd[9:])
                         
-                        if "HALT" in cmd and self._client_id == self.busy_id:
+                        if "HALT" in cmd and (self._client_id == self.busy_id or self.busy_id == 0):
                             self.handle_halt()
 
                         if cmd in command_handlers and self.busy_id == 0:
