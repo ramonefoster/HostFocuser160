@@ -12,19 +12,19 @@ Exemplo: MOVE=posição\
 Exemplo: FOCUSIN=velocidade\
 <b>FOCUSOUT:</b> Move o valor do foco para fora com velocidade (microns/s) como parâmetro.\
 Exemplo: FOCUSOUT=velocidade\
-<b>HALT:</b> Interrompe o Focuser (condicional com base no ID do cliente).\
+<b>HALT:</b> Interrompe o Focuser (condicional com base no ID do cliente).
 
 ## Utilização
 
 Os clientes devem enviar comandos no seguinte formato JSON:\
 <b>{</b>\
-    <b>"clientId":</b> 1234,\
-    <b>"clientTransactionId":</b> 9876,\
-    <b>"controller":</b> "Focuser160",\
-    <b>"action":</b> {	<b>"cmd":</b> "NOME_DO_COMANDO" }\
-<b>}</b>\
+    &emsp;<b>"clientId":</b> 1234,\
+    &emsp;<b>"clientTransactionId":</b> 9876,\
+    &emsp;<b>"controller":</b> "Focuser160",\
+    &emsp;<b>"action":</b> {	<b>"cmd":</b> "NOME_DO_COMANDO" }\
+<b>}</b>
 
-Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros adicionais conforme necessário. <b>NOME_DO_COMANDO</b> deve ser todo maiúsculo.\
+Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros adicionais conforme necessário. <b>NOME_DO_COMANDO</b> deve ser todo maiúsculo.
 <h3>Do Alpaca:</h3> 
 <p><b>clientId:</b> Client's unique ID. (1 to 4294967295). The client should choose a value at start-up, e.g. a random value between 1 and 65535, and send this on every transaction to associate entries in device logs with this particular client. Zero is a reserved value that clients should not use.</p>
 <b>clientTransactionId:</b> Client's transaction ID. (1 to 4294967295). The client should start this count at 1 and increment by one on each successive transaction. This will aid associating <p>entries in device logs with corresponding entries in client side logs. Zero is a reserved value that clients should not use.</p>
@@ -46,4 +46,4 @@ Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros ad
 <b>tempCompAvailable: BOOL</b> Indica se a compensação de temperatura está disponível (origem arquivo Config).\
 <b>temperature: DOUBLE</b> temperatura do dispositivo (futura implementação).\
 <b>timestamp: DOUBLE</b> Data/hora da resposta em formato de timestamp.\
-<b>position: DOUBLE</b> Posição atual do Focalizador em mícrons.\
+<b>position: DOUBLE</b> Posição atual do Focalizador em mícrons.
