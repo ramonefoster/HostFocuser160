@@ -43,6 +43,7 @@ def create_default_toml_file():
             "deviceID" : '3285e9af-8d1d-4f9d-b368-d129d8e9a24b', # https://guidgenerator.com/online-guid-generator.aspx
             "device_ip" : '192.168.1.250',
             "device_port" : 5001,
+            "encoder2microns": 47.778,
             "max_step" : 1000000,            
             "maxincrement": 0,
             "tempcompavailable": False,
