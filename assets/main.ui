@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Focuser Server</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(36, 31, 49);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="btnStart">
     <property name="geometry">
@@ -23,8 +26,15 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(87, 227, 137);</string>
+     <string notr="true">background-color: rgb(53, 132, 228);
+border-radius: 8px;</string>
     </property>
     <property name="text">
      <string>Start</string>
@@ -39,8 +49,15 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(192, 28, 40);</string>
+     <string notr="true">background-color: rgb(192, 28, 40);
+border-radius: 8px;</string>
     </property>
     <property name="text">
      <string>Stop</string>
@@ -54,6 +71,9 @@
       <width>201</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
     </property>
     <property name="text">
      <string>Show LOG</string>
@@ -70,6 +90,10 @@
     </property>
     <property name="toolTip">
      <string>Minimizes program to tray.</string>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius: 8px;
+background-color: rgb(119, 118, 123);</string>
     </property>
     <property name="text">
      <string>Hide</string>
@@ -91,6 +115,9 @@
       <bold>true</bold>
      </font>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="text">
      <string>Focuser160MQ</string>
     </property>
@@ -103,9 +130,12 @@
      <rect>
       <x>10</x>
       <y>70</y>
-      <width>211</width>
+      <width>215</width>
       <height>121</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
     </property>
     <property name="title">
      <string>Connectivity</string>
@@ -118,6 +148,12 @@
        <width>181</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string/>
@@ -135,6 +171,12 @@
        <height>20</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -150,6 +192,12 @@
        <width>181</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string/>
@@ -168,6 +216,9 @@
       <height>17</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="text">
      <string>Position</string>
     </property>
@@ -184,6 +235,9 @@
       <height>17</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="text">
      <string>Moving</string>
     </property>
@@ -199,6 +253,9 @@
       <width>67</width>
       <height>17</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
     </property>
     <property name="text">
      <string>Error</string>
@@ -221,6 +278,9 @@
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
     </property>
     <property name="text">
      <string>0</string>
@@ -278,6 +338,9 @@ border-radius: 10px;</string>
       <height>20</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="text">
      <string>Device (Un)Reachable</string>
     </property>
@@ -294,8 +357,11 @@ border-radius: 10px;</string>
       <height>21</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="text">
-     <string>ClientID:</string>
+     <string>ClientId:</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="txtClientID">
@@ -319,6 +385,9 @@ border-radius: 10px;</string>
     <property name="toolTip">
      <string>Current Client</string>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(222, 221, 218);</string>
+    </property>
     <property name="frame">
      <bool>false</bool>
     </property>
@@ -338,6 +407,9 @@ border-radius: 10px;</string>
      <width>240</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(222, 221, 218);</string>
    </property>
    <widget class="QMenu" name="menuSetup">
     <property name="title">

@@ -62,13 +62,13 @@ class App():
             "homing": False,
             "initialized": False,
             "isMoving": False,
+            "maxSpeed": Config.max_speed,
             "maxStep": Config.max_step,
             "tempComp": Config.temp_comp,
             "tempCompAvailable": Config.tempcompavailable, 
             "temperature": 0, 
             "timestamp": datetime.timestamp(datetime.now()),       
-            "position": 0,
-            "maxSpeed": Config.max_speed,
+            "position": 0            
             }
 
         # self.device = FocuserDriver(logger)
@@ -159,7 +159,7 @@ class App():
         self.status["timestamp"] = round(datetime.timestamp(datetime.now()), 2)
         json_string = json.dumps(self.status)        
         self.publisher.send_string(json_string)
-        self.logger.info(f'Status published: {self.status}')
+        # self.logger.info(f'Status published: {self.status}')
     
     def stop(self):
         """Stop main loop and unregister zmq.POLL"""
