@@ -9,9 +9,16 @@ import logging
 import logging.handlers
 import time
 import os
-from src.core.config import Config
+try:
+    from src.core.config import Config    
+    CONFIG_FILE = True
+except:
+    CONFIG_FILE = False
 
 def init_logging():
+    if not CONFIG_FILE:
+        return
+    
     """ Create customized logger """
     docs_folder = os.path.join(os.path.expanduser("~"), "Documents")
 

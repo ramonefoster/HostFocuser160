@@ -99,6 +99,7 @@ class Config:
     temp_comp: bool = get_toml('Device', 'temp_comp')
     stepsize: int = get_toml('Device', 'stepsize')
     max_speed: int = get_toml('Device', 'max_speed')
+    enc_2_microns: float = get_toml('Device', 'encoder2microns')
     maxincrement: int = get_toml('Device', 'maxincrement')
     tempcompavailable: bool = get_toml('Device', 'tempcompavailable')
     # ---------------

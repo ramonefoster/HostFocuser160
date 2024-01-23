@@ -179,7 +179,7 @@ class FocuserDriver():
             # else:
             #     return self._last_pos
             # self._position = conv_position
-            self._position = int(round(step/47.778))
+            self._position = int(round(step/Config.enc_2_microns))
             self._last_pos = self._position
             self._lock.release()
             return self._position
@@ -307,7 +307,7 @@ class FocuserDriver():
         Raises:
             RuntimeError if Invalid input or if device is busy
         """      
-        pos_conv = int(round((47.778 * position), 0))
+        pos_conv = int(round((Config.enc_2_microns * position), 0))
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
         if 0 >= pos_conv >= self._max_step:

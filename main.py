@@ -14,11 +14,20 @@ import sys
 import time
 import os
 from threading import Thread
-
-from src.core.app import App
 from src.core.log import init_logging
-from src.core.config import Config
-from misc.client_sample import ClientSimulator
+
+try:
+    from src.core.config import Config    
+    CONFIG_FILE = True
+    ERR_VALUE = None
+except Exception as e:
+    ERR_VALUE = str(e)
+    CONFIG_FILE = False
+
+if CONFIG_FILE:
+    from src.core.app import App
+    
+    from misc.client_sample import ClientSimulator
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -33,6 +42,15 @@ class FocuserOPD(QtWidgets.QMainWindow):
         super(FocuserOPD, self).__init__()
         uic.loadUi(main_ui_path, self)
 
+        if not CONFIG_FILE:
+            close = QMessageBox()
+            close.setText(f"Arquivo de configuração com problemas!\n{ERR_VALUE}")
+            close.setStandardButtons(QMessageBox.Ok)
+            close = close.exec()
+
+            if close == QMessageBox.Ok:   
+                sys.exit()
+            
         self.control = App(logger)
 
         self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
@@ -141,7 +159,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
     
     def stop(self):
         """Stops main program and the main loop at Application interface with Device"""
-        self.control.disconnect()
+        if self.control:
+            self.control.disconnect()
         if self.run_thread and self.run_thread.is_alive():
             self.run_thread.join()
     
@@ -225,11 +244,13 @@ class FocuserOPD(QtWidgets.QMainWindow):
             event.ignore()
 
 if __name__ == "__main__":
-    logger = init_logging()
-    app = QtWidgets.QApplication([])
+
+    logger = init_logging() 
+    app = QtWidgets.QApplication([])       
 
     main_window1 = FocuserOPD()
     main_window1.show()
+    
 
     sys.exit(app.exec_()) 
     

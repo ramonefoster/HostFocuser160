@@ -22,6 +22,9 @@ class ClientSimulator(QtWidgets.QMainWindow):
         super(ClientSimulator, self).__init__()
         uic.loadUi(main_ui_path, self)
 
+        if not self.check_config():
+            return
+
         self.btnMove.clicked.connect(self.move_to)
         self.btnConnect.clicked.connect(self.connect)
         self.btnHalt.clicked.connect(self.halt)
@@ -56,7 +59,16 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.get_status()
-        self.timer.start(100)        
+        self.timer.start(100)  
+
+    def check_config(self):
+        try:
+            self.ip_addr = Config.ip_address  
+            self.port_pub = Config.port_pub  
+            self.port_pull = Config.port_pull 
+            return True
+        except:
+            return False
 
     def start_client(self):
         self.subscriber = self.context.socket(zmq.SUB)
