@@ -19,7 +19,7 @@ Exemplo: FOCUSOUT=velocidade\
 Os clientes devem enviar comandos no seguinte formato JSON:\
 <b>{</b>\
     &emsp;<b>"clientId":</b> 1234,\
-    &emsp;<b>"clientTransactionId":</b> 9876,
+    &emsp;<b>"clientTransactionId":</b> 9876,\
     &emsp;<b>"clientName":</b> "S4GUI",\
     &emsp;<b>"controller":</b> "Focuser160",\
     &emsp;<b>"action":</b> "NOME_DO_COMANDO"\
