@@ -32,14 +32,14 @@ def create_default_toml_file():
     default_data = {
         "title" : "Focuser160MQ",
         "General": {
-            "name" : 'LNA Focus160',
+            "name" : 'Focuser160',
             "version" : '0.1.0',
             "description" : 'Interface for Perkin-Elmer Focuser',
             "startup" : True
         },
         "Device": {
             "absolute" : True,
-            "deviceType" : 'Focuser',
+            "device_name" : 'Mirror2',
             "deviceID" : '3285e9af-8d1d-4f9d-b368-d129d8e9a24b', # https://guidgenerator.com/online-guid-generator.aspx
             "device_ip" : '192.168.1.250',
             "device_port" : 5001,
@@ -84,6 +84,7 @@ class Config:
     # General Section
     # ---------------
     startup: str = get_toml('General', 'startup')
+    name: str = get_toml('General', 'name')
     # ---------------
     # Network Section
     # ---------------
@@ -93,15 +94,16 @@ class Config:
     # --------------
     # Device Section
     # --------------
+    device_name: str = get_toml('Device', 'device_name')
     device_ip: str = get_toml('Device', 'device_ip')
     device_port: int = get_toml('Device', 'device_port')
     absolute: bool = get_toml('Device', 'absolute')
     max_step: int = get_toml('Device', 'max_step')
     temp_comp: bool = get_toml('Device', 'temp_comp')
-    stepsize: int = get_toml('Device', 'stepsize')
+    stepsize: int = get_toml('Device', 'step_size')
     max_speed: int = get_toml('Device', 'max_speed')
     enc_2_microns: float = get_toml('Device', 'encoder2microns')
-    maxincrement: int = get_toml('Device', 'maxincrement')
+    maxincrement: int = get_toml('Device', 'max_increment')
     tempcompavailable: bool = get_toml('Device', 'tempcompavailable')
     # ---------------
     # Logging Section

@@ -58,24 +58,24 @@ class App():
             "alarm": 0,
             "cmd": '',
             "connected": False,
+            "controller": Config.name,
+            "device": Config.device_name,
             "error": '',
             "homing": False,
             "initialized": False,
             "isMoving": False,
             "maxSpeed": Config.max_speed,
             "maxStep": Config.max_step,
+            "position": 0,
             "tempComp": Config.temp_comp,
-            "tempCompAvailable": Config.tempcompavailable, 
-            "temperature": 0, 
-            "timestamp": datetime.timestamp(datetime.now()),       
-            "position": 0            
-            }
-
-        # self.device = FocuserDriver(logger)
+            "tempCompAvailable": Config.tempcompavailable,
+            "temperature": 0,
+            "timestamp": datetime.timestamp(datetime.now())            
+        }
         
         self.device = Focuser(self.logger)
         self.reach_device()
-        self.start_server() 
+        self.start_server()
 
     def reach_device(self):
         _try = 0
@@ -289,8 +289,7 @@ class App():
                     msg_pull = self.puller.recv_string()
                     try:
                         msg_pull = json.loads(msg_pull)
-                        action = msg_pull.get("action")
-                        cmd = action.get("cmd")
+                        cmd = msg_pull.get("action")                        
                         if not 'STATUS' in cmd:
                             self.status["cmd"] = msg_pull
                             self._client_id = msg_pull.get("clientId") 

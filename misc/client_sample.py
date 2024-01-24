@@ -50,8 +50,8 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self._msg_json = {
             "clientId": self._client_id,
             "transactionId": 0,
-            "controller": "Focuser160",
-            "action": {"cmd": "STATUS"}
+            "clientName": "Simulator",
+            "action": "STATUS"
             }
 
         self.start_client()
@@ -84,39 +84,39 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.pusher.connect(f"tcp://{Config.ip_address}:{Config.port_pull}")
     
     def connect(self):
-        self._msg_json["action"]["cmd"] = "CONNECT"
+        self._msg_json["action"] = "CONNECT"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def home(self):
-        self._msg_json["action"]["cmd"] = "HOME"
+        self._msg_json["action"] = "HOME"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def disconnect(self):
-        self._msg_json["action"]["cmd"] = "DISCONNECT"
+        self._msg_json["action"] = "DISCONNECT"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def halt(self):
-        self._msg_json["action"]["cmd"] = "HALT"
+        self._msg_json["action"] = "HALT"
         self.pusher.send_string(json.dumps(self._msg_json))
 
     def move_to(self):
         if not self.is_moving:
             pos = self.txtMov.text()
-            self._msg_json["action"]["cmd"] = F"MOVE={pos}"
+            self._msg_json["action"] = F"MOVE={pos}"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def move_in(self):
         if not self.is_moving:
-            self._msg_json["action"]["cmd"] = F"FOCUSIN"
+            self._msg_json["action"] = F"FOCUSIN"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def move_out(self):
         if not self.is_moving:
-            self._msg_json["action"]["cmd"] = F"FOCUSOUT"
+            self._msg_json["action"] = F"FOCUSOUT"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def get_status(self):
-        self._msg_json["action"]["cmd"] = "STATUS"
+        self._msg_json["action"] = "STATUS"
         self.pusher.send_string(json.dumps(self._msg_json))
     
     def update(self):
