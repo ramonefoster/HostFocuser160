@@ -19,9 +19,10 @@ Exemplo: FOCUSOUT=velocidade\
 Os clientes devem enviar comandos no seguinte formato JSON:\
 <b>{</b>\
     &emsp;<b>"clientId":</b> 1234,\
-    &emsp;<b>"clientTransactionId":</b> 9876,\
+    &emsp;<b>"clientTransactionId":</b> 9876,
+    &emsp;<b>"clientName":</b> "S4GUI",\
     &emsp;<b>"controller":</b> "Focuser160",\
-    &emsp;<b>"action":</b> {	<b>"cmd":</b> "NOME_DO_COMANDO" }\
+    &emsp;<b>"action":</b> "NOME_DO_COMANDO"\
 <b>}</b>
 
 Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros adicionais conforme necessário. <b>NOME_DO_COMANDO</b> deve ser todo maiúsculo.
@@ -36,6 +37,8 @@ Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros ad
 <b>alarm: BOOL</b> Flag de alarme atual.\
 <b>cmd: STRING</b> Comando atual ou última ação executada.\
 <b>connected: BOOL</b> Indica se o Focalizador está conectado.\
+<b>controller: STRING</b> Identifica o HOST (ex: S4GUI).\
+<b>device: STRING</b> Identifica o dispositivo que ele aciona (?ex: Mirror2).\
 <b>error: STRING</b> Mensagem de erro ou descrição vazia se não houver erro.\
 <b>homing: BOOL</b> Indica se o Focalizador está atualmente em processo de homing.\
 <b>initialized: BOOL</b> Indica se rotina INIT foi realizada.\
