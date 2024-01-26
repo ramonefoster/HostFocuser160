@@ -44,12 +44,14 @@ def create_default_toml_file():
             "device_ip" : '192.168.1.250',
             "device_port" : 5001,
             "encoder2microns": 47.778,
+            "max_speed": 0,
             "max_step" : 1000000,            
             "maxincrement": 0,
             "tempcompavailable": False,
             "temp_comp" : False,
-            "stepsize": 0,
-            "max_speed": 0            
+            "speedFactor": 428,
+            "stepsize": 0
+                        
         },
         "Network" : {
                 "ip_address" : '127.0.0.1',
@@ -103,7 +105,9 @@ class Config:
     stepsize: int = get_toml('Device', 'step_size')
     max_speed: int = get_toml('Device', 'max_speed')
     enc_2_microns: float = get_toml('Device', 'encoder2microns')
+    speed_factor: int = get_toml('Device', 'speedFactor')
     maxincrement: int = get_toml('Device', 'max_increment')
+    speed_security: int = get_toml('Device', 'speed_security')
     tempcompavailable: bool = get_toml('Device', 'tempcompavailable')
     # ---------------
     # Logging Section

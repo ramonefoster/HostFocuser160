@@ -107,12 +107,12 @@ class ClientSimulator(QtWidgets.QMainWindow):
     
     def move_in(self):
         if not self.is_moving:
-            self._msg_json["action"] = F"FOCUSIN"
+            self._msg_json["action"] = F"FOCUSIN=200"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def move_out(self):
         if not self.is_moving:
-            self._msg_json["action"] = F"FOCUSOUT"
+            self._msg_json["action"] = F"FOCUSOUT=200"
             self.pusher.send_string(json.dumps(self._msg_json))
     
     def get_status(self):

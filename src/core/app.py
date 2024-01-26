@@ -51,7 +51,7 @@ class App():
         self._stopping = False
         self._client_id = 0
         self.busy_id = 0
-        self._speed = Config.max_speed
+        self._current_speed = Config.max_speed
 
         # Status Message
         self.status = {
@@ -76,7 +76,7 @@ class App():
             "tempComp": Config.temp_comp,
             "tempCompAvailable": Config.tempcompavailable,
             "temperature": 0,
-            "timestamp": datetime.timestamp(datetime.now())            
+            "timestamp": datetime.isoformat(datetime.now(), timespec='milliseconds')            
         }
         
         self.device = Focuser(self.logger)
@@ -137,6 +137,9 @@ class App():
     
     def close_connection(self):
         """Unbind all sockets and destroy context"""
+        self.device.disconnect()
+        self.status["connected"] = self.device.connected
+        self.pub_status()
         try:
             self.publisher.unbind(f"tcp://{self.ip_address}:{self.port_pub}")
             self.logger.info(f'Disconnecting Publisher')
@@ -148,7 +151,6 @@ class App():
         except Exception as e:
             self.logger.error(f'Error closing Puller connection: {str(e)}')
         
-        self.device.disconnect()
         self.context.destroy()
         self.context = None
 
@@ -161,7 +163,7 @@ class App():
     
     def pub_status(self):
         """Publishes status via ZeroMQ"""
-        self.status["timestamp"] = round(datetime.timestamp(datetime.now()), 2)
+        self.status["timestamp"] = datetime.isoformat(datetime.now(), timespec='milliseconds')
         json_string = json.dumps(self.status)        
         self.publisher.send_string(json_string)
         self.logger.info(f'Status published: {self.status}')
@@ -183,7 +185,7 @@ class App():
             s.settimeout(.6)
             s.connect((Config.device_ip, Config.device_port))
             s.close()
-            time.sleep(.2)
+            time.sleep(.1)
             return True
         except Exception as e:
             return False           
@@ -193,7 +195,7 @@ class App():
         microswitches and then removing the backlash until the encoder return 0"""
         try:
             res = self.device.home()
-            time.sleep(.2)
+            time.sleep(.1)
             if res == "OK":
                 self._homing = True
                 self._is_moving = True
@@ -209,7 +211,7 @@ class App():
     def handle_halt(self):
         """Stops the motor"""
         if self.device.Halt():
-            time.sleep(.2)
+            time.sleep(.1)
             self._is_moving = True # set _is_moving to true so the main loop can realy check if the motor is moving or not
             self.logger.info(f'Device Stopped')
         else:
@@ -218,11 +220,18 @@ class App():
 
     def handle_speed(self, vel):
         """Change the motor's speed"""
-        if self.device.speed(int(vel)):
-            time.sleep(.2)
-            self.logger.info(f'Speed changed')
-        else:
-            self.logger.info(f'Speed change Fail')
+        if vel > Config.max_speed:
+            vel = Config.max_speed
+        elif vel <=0:
+            vel = Config.max_speed
+        try:
+            if self.device.speed(vel):
+                time.sleep(.1)
+                self.logger.info(f'Speed changed')
+            else:
+                self.logger.info(f'Speed change Fail')
+        except Exception as e:
+            self.logger.error(f"Error speed {str(e)}")
 
     def handle_connect(self):
         """(Deprecated) - Self explained"""
@@ -234,24 +243,19 @@ class App():
         """(Deprecated) - Self explained"""
         self.logger.info(f'Device Disconnected')
 
-    def handle_move(self, pos, vel):
+    def handle_move(self, pos, speed):
         """Move focuser to a position
         Args: 
-            position (integer)
-            vel (integer)
-        """        
-        if vel > Config.max_speed:
-            vel = Config.max_speed
-        elif vel <=0:
-            vel = Config.max_speed
+            position microns (integer)
+            speed microns/s(integer)
+        """   
         try:
-            if vel != self._speed:
-                self.handle_speed(int(vel))
+            if int(speed) != Config.max_speed:
+                self.handle_speed(int(speed))
             self.device.move(int(pos))
             self.logger.info(f'Moving to {pos} position')
-            time.sleep(.2)
+            time.sleep(.1)
             self._is_moving = True
-            self._speed = vel
         except Exception as e:
             self.status["alarm"] = self.device.alarm()
             self.status["error"] = str(e)
@@ -304,9 +308,8 @@ class App():
                             # was requested by the same client
                             self.status["cmd"] = msg_pull
                             self._client_id = msg_pull.get("clientId") 
-                    except:
-                        continue
-                              
+                    except Exception as e:
+                        print(e)
                     try:
                         # Handle all possible commands
                         self.status["error"] = ""
@@ -321,10 +324,10 @@ class App():
                         if "MOVE=" in cmd and self.busy_id == 0:
                             self.handle_move(cmd[5:], Config.max_speed)
                         
-                        if "FOCUSIN=" in cmd and self.busy_id == 0:
+                        if "FOCUSIN" in cmd and self.busy_id == 0:
                             self.handle_move(1, cmd[8:])
                         
-                        if "FOCUSOUT=" in cmd and self.busy_id == 0:
+                        if "FOCUSOUT" in cmd and self.busy_id == 0:
                             self.handle_move(Config.max_step, cmd[9:])
                         
                         if "HALT" in cmd and (self._client_id == self.busy_id or self.busy_id == 0):

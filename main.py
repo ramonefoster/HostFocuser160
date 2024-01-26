@@ -69,6 +69,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         self.log_text_edit = QtWidgets.QTextEdit()  # Widget to display log
         self.log_dock_widget = QtWidgets.QDockWidget("Log", self)
         self.log_dock_widget.setWidget(self.log_text_edit)
+        self.log_text_edit.setStyleSheet("color: lightgrey")
         self.boxLog.stateChanged.connect(self.toggle_log_view)     
         self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
         self.log_dock_widget.setMinimumSize(600, 500)   
@@ -80,10 +81,12 @@ class FocuserOPD(QtWidgets.QMainWindow):
         self.conf_text_edit = QtWidgets.QTextEdit()
         self.save_button = QtWidgets.QPushButton("Save")
         self.save_button.clicked.connect(self.save_config_file)
+        self.save_button.setStyleSheet("background-color: lightgrey")
         # Create a widget to hold the QTextEdit and the "Save" button
         widget_inside_dock = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.conf_text_edit)
+        self.conf_text_edit.setStyleSheet("color: lightgrey")
         layout.addWidget(self.save_button)
         widget_inside_dock.setLayout(layout)
         # Create the QDockWidget and set its content
@@ -172,8 +175,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
     def read_config_file(self, file_path):
         """Reads config file"""
         with open(file_path, "r") as file:
-            log_content = file.read()
-            self.conf_text_edit.setPlainText(log_content)
+            config_content = file.read()
+        self.conf_text_edit.setPlainText(config_content)
     
     def save_config_file(self):
         """Save modified config in config file"""

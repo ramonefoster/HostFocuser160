@@ -111,6 +111,7 @@ class FocuserDriver():
         if self._connected:
             try:
                 self.motor_socket.close()
+                self._connected = False
             except:
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
@@ -289,7 +290,7 @@ class FocuserDriver():
         pos_conv = int(round((Config.enc_2_microns * position), 0))
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
-        if 0 >= pos_conv >= self._max_step:
+        if 0 >= position >= self._max_step:
             raise RuntimeError('Invalid Target')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
@@ -297,7 +298,7 @@ class FocuserDriver():
         if "OK" in resp:            
             resp = self._write(f"GS29", max_retries=3)
             if "OK" in resp:
-                self.logger.info(f'[Device] move={str(pos_conv)}')
+                self.logger.info(f'[Device] move={str(position)}')
                 return
             else:
                 alarm = self.alarm()
@@ -311,28 +312,27 @@ class FocuserDriver():
     def speed(self, vel: int):  
         """Sets the speed of the motor
         Args:  
-            vel (int): speed value in rpm.
-        Returns: 
-            Device response or Error message
+            vel (int): speed value in microns/s.
         Raises:
             RuntimeError if Invalid input or if device is busy
         """      
-        pass
-        # if self._is_moving:
-        #     raise RuntimeError('Cannot set speed while the focuser is moving')
+        vel_conv = vel*Config.speed_factor
+        if self._is_moving:
+            raise RuntimeError('Cannot set speed while the focuser is moving')
         # if 0 > vel >= self._max_speed:
-        #     raise RuntimeError('Invalid Steps')        
-        # resp = self._write(f"V20={vel}", max_retries=3)
-        # if "OK" in resp: 
-        #     self.logger.info(f'[Device] speed={str(vel)}')
-        #     return            
-        # else:
-        #     raise RuntimeError(f'Error: {resp}')           
+        #     raise RuntimeError('Invalid Steps') 
+        if vel_conv > Config.speed_security:
+            vel_conv = Config.speed_security       
+        resp = self._write(f"HSPD={vel_conv}", max_retries=3)
+        if "OK" in resp: 
+            self.logger.info(f'[Device] speed={str(vel)}')
+            return True           
+        else:
+            raise RuntimeError(f'[device] {resp}')           
 
     def stop(self) -> None:
         """Complements the HALT method"""
         self._lock.acquire()
-        print('[stop] Stopping...')        
         self._is_moving = False
         self._stopped = True
         if self._timer is not None:
@@ -343,7 +343,7 @@ class FocuserDriver():
     def Halt(self) -> None:   
         """Send command STOP and stops main program with GS0=0 subroutine"""     
         resp_stop = self._write("STOP", 5)
-        if resp_stop == 'OK':            
+        if resp_stop == 'OK':                 
             self.logger.info('[Device] halt')
             self.stop()
             return True  # Command executed successfully 
