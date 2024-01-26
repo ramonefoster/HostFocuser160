@@ -42,6 +42,7 @@ class App():
         self.previous_homing = False
         self.previous_pos = 0
         self.last_ping_time = datetime.now()
+        self.last_pub = datetime.now()
 
         #variables for status request
         self._is_moving = False
@@ -56,11 +57,16 @@ class App():
         self.status = {
             "absolute": Config.absolute,
             "alarm": 0,
-            "cmd": '',
+            "cmd": {
+                "clientId": self._client_id,
+                "clientTransactionId": 0,
+                "clientName": "",
+                "action": ""
+            },
             "connected": False,
             "controller": Config.name,
             "device": Config.device_name,
-            "error": '',
+            "error": "",
             "homing": False,
             "initialized": False,
             "isMoving": False,
@@ -78,6 +84,7 @@ class App():
         self.start_server()
 
     def reach_device(self):
+        """Ping device and reads the position and initialized variables"""
         _try = 0
         for _try in range(5):
             self.reachable = self.ping_server()
@@ -92,7 +99,7 @@ class App():
                 self.status["position"] = self._position
                 self.status["initialized"] = self.device.initialized
             except Exception as e:
-                print(e) 
+                self.logger.error(f'Error reaching device: {str(e)}') 
 
     def start_server(self): 
         """ Starts Server ZeroMQ, creating context 
@@ -110,7 +117,6 @@ class App():
             self.publisher.bind(f"tcp://{self.ip_address}:{self.port_pub}")
             print(f"Publisher binded to {self.ip_address}:{self.port_pub}")
         except Exception as e:
-            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Publihser: {str(e)}')
             return
 
@@ -120,7 +126,6 @@ class App():
             self.puller.bind(f"tcp://{self.ip_address}:{self.port_pull}")
             print(f"Pull binded to {self.ip_address}:{self.port_pull}")
         except Exception as e:
-            self.status["error"] = f'{str(e)}'
             self.logger.error(f'Error Binding Puller: {str(e)}')
             return
 
@@ -159,7 +164,7 @@ class App():
         self.status["timestamp"] = round(datetime.timestamp(datetime.now()), 2)
         json_string = json.dumps(self.status)        
         self.publisher.send_string(json_string)
-        # self.logger.info(f'Status published: {self.status}')
+        self.logger.info(f'Status published: {self.status}')
     
     def stop(self):
         """Stop main loop and unregister zmq.POLL"""
@@ -181,7 +186,6 @@ class App():
             time.sleep(.2)
             return True
         except Exception as e:
-            print(e)
             return False           
 
     def handle_home(self):
@@ -197,7 +201,6 @@ class App():
                 self.status["alarm"] = self.device.alarm()
             self.logger.info(f'Device Homing {res}')
         except Exception as e:
-            print(e)
             self.status["alarm"] = self.device.alarm()
             self.status["error"] = str(e)
             self.logger.error(f'Homing {e}')
@@ -222,11 +225,13 @@ class App():
             self.logger.info(f'Speed change Fail')
 
     def handle_connect(self):
+        """(Deprecated) - Self explained"""
         self.logger.info(f'Device Connected')
         self.device.position
         self.pub_status()
 
     def handle_disconnect(self):
+        """(Deprecated) - Self explained"""
         self.logger.info(f'Device Disconnected')
 
     def handle_move(self, pos, vel):
@@ -276,6 +281,7 @@ class App():
         #     self.status["clientId"] = 0
 
     def run(self):
+        """Main Loop"""
         self._client_id = 0
         self.start_server()
         self.stop_var = False
@@ -283,22 +289,27 @@ class App():
         while not self.stop_var:
             t0 = time.time()
             current_time = datetime.now()
+            if -15 > (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) > 15:                
+                self.pub_status()
+                self.last_pub = current_time
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
                 if socks.get(self.puller) == zmq.POLLIN:
                     msg_pull = self.puller.recv_string()
                     try:
                         msg_pull = json.loads(msg_pull)
-                        cmd = msg_pull.get("action")                        
-                        if not 'STATUS' in cmd:
+                        cmd = msg_pull.get("action") 
+                        if not 'STATUS' in cmd and (msg_pull.get("clientId") == self._client_id or self._client_id == 0):
+                            # Only accept commands (except for status request) if not busy or if it 
+                            # was requested by the same client
                             self.status["cmd"] = msg_pull
                             self._client_id = msg_pull.get("clientId") 
                     except:
-                        self.status["error"] = "Invalid JSON command."
                         continue
                               
                     try:
-                        self.status["error"] = ''
+                        # Handle all possible commands
+                        self.status["error"] = ""
                         command_handlers = {
                             'HOME': self.handle_home,
                             'HALT': self.handle_halt,
@@ -325,7 +336,6 @@ class App():
                         self.status["connected"] = self.device.connected
 
                     except Exception as e:
-                        self.status["error"] = str(e)
                         self.pub_status()
                         self.logger.error(f'Error: {str(e)}')
 
@@ -336,8 +346,14 @@ class App():
                     self._homing = self.device.homing 
                     # self._position = self.device.position 
                 if not self._homing and not self._is_moving:
+                    # this means the device is not busy
                     self._client_id = 0
-                    self.status["cmd"] = ''                    
+                    self.status["cmd"] =  {
+                                            "clientId": self._client_id,
+                                            "clientTransactionId": 0,
+                                            "clientName": "",
+                                            "action": ""
+                                            }                    
                 
                 self.busy_id = self._client_id
                 self.update_status()                

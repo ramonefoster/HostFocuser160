@@ -114,28 +114,7 @@ class FocuserDriver():
             except:
                 raise RuntimeError('Cannot disconnect')
         self._lock.release()
-    
-    # def start(self, from_run: bool = False) -> None:
-    #     print('[start]')
-    #     self._lock.acquire()
-    #     if from_run or self._stopped:
-    #         self._stopped = False
-    #         self._timer = Timer(self._interval, self._run)
-    #         self._timer.start()
-    #         self._lock.release()
-    #         print('[start] lock released')
-    #     else:
-    #         self._lock.release()
-    #         print('[start] lock released')
-    
-    # def _run(self) -> None:
-    #     if not self._is_moving:
-    #         self._stopped = True
-    #     print('[_run] lock released')
-    #     if self._is_moving:
-    #         print('[_run] more motion needed, start another timer interval')
-    #         self.start(from_run = True)
-    
+        
     @property
     def temp(self):
         self._lock.acquire()
@@ -311,7 +290,7 @@ class FocuserDriver():
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
         if 0 >= pos_conv >= self._max_step:
-            raise RuntimeError('Invalid Steps')
+            raise RuntimeError('Invalid Target')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
         resp = self._write(f"V20={pos_conv}", max_retries=3)
@@ -351,6 +330,7 @@ class FocuserDriver():
         #     raise RuntimeError(f'Error: {resp}')           
 
     def stop(self) -> None:
+        """Complements the HALT method"""
         self._lock.acquire()
         print('[stop] Stopping...')        
         self._is_moving = False
@@ -378,7 +358,8 @@ class FocuserDriver():
             Device response or Error message
         """
         retries = 0
-        if self._connected:              
+        if self._connected:  
+            time.sleep(.2)            
             while retries < max_retries:  
                 try:   
                     self.motor_socket.sendall(bytes(f'{cmd}\x00', 'utf-8'))
@@ -389,6 +370,7 @@ class FocuserDriver():
                 retries += 1
             self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
             if "WinError" in err:
+                # If many retries were unsucessful, says the device is not connected
                 self._connected = False
             # print(f"Error writing ETH: {cmd}: {str(err)}")
             return str(err)
