@@ -242,6 +242,31 @@ class App():
     def handle_disconnect(self):
         """(Deprecated) - Self explained"""
         self.logger.info(f'Device Disconnected')
+    
+    def handle_in_out(self, direction, speed):
+        """Move focuser to a position
+        Args: 
+            direction (int): 1 for IN, 0 for OUT.
+            speed microns/s(integer)
+        """   
+        try:
+            if int(speed) != Config.max_speed:
+                self.handle_speed(int(speed))
+            if direction == 1:
+                # FOCUS IN
+                self.device.focus_in_out(int(direction))
+                self.logger.info(f'Moving FOCUSIN')
+            elif direction == 0:
+                # FOCUS OUT
+                self.device.focus_in_out(int(direction))
+                self.logger.info(f'Moving FOCUSOUT')
+            time.sleep(.1)
+            self._is_moving = True
+        except Exception as e:
+            self.status["alarm"] = self.device.alarm()
+            self.status["error"] = str(e)
+            self.logger.error(f'Moving FOCUS IN | OUT')
+            self.pub_status()
 
     def handle_move(self, pos, speed):
         """Move focuser to a position
@@ -250,8 +275,6 @@ class App():
             speed microns/s(integer)
         """   
         try:
-            if int(speed) != Config.max_speed:
-                self.handle_speed(int(speed))
             self.device.move(int(pos))
             self.logger.info(f'Moving to {pos} position')
             time.sleep(.1)
@@ -325,10 +348,10 @@ class App():
                             self.handle_move(cmd[5:], Config.max_speed)
                         
                         if "FOCUSIN" in cmd and self.busy_id == 0:
-                            self.handle_move(1, cmd[8:])
+                            self.handle_in_out(1, cmd[8:])
                         
                         if "FOCUSOUT" in cmd and self.busy_id == 0:
-                            self.handle_move(Config.max_step, cmd[9:])
+                            self.handle_in_out(0, cmd[9:])
                         
                         if "HALT" in cmd and (self._client_id == self.busy_id or self.busy_id == 0):
                             self.handle_halt()

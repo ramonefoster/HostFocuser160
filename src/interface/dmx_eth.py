@@ -323,12 +323,34 @@ class FocuserDriver():
         #     raise RuntimeError('Invalid Steps') 
         if vel_conv > Config.speed_security:
             vel_conv = Config.speed_security       
-        resp = self._write(f"HSPD={vel_conv}", max_retries=3)
+        resp = self._write(f"V21={vel_conv}", max_retries=3)
         if "OK" in resp: 
             self.logger.info(f'[Device] speed={str(vel)}')
             return True           
         else:
-            raise RuntimeError(f'[device] {resp}')           
+            raise RuntimeError(f'[device] {resp}')    
+
+    def focus_in_out(self, direction: int):  
+        """Sets the speed of the motor
+        Args:  
+            direction (int): 1 for IN, 0 for OUT.
+        Raises:
+            RuntimeError if Invalid input or if device is busy
+        """      
+        if self._is_moving:
+            raise RuntimeError('Cannot set speed while the focuser is moving')
+        if direction != 1 and direction != 0:
+            return
+        else:
+            resp = self._write(f"GS2{str(direction)}", max_retries=3)
+        if "OK" in resp: 
+            if direction == 1:                
+                self.logger.info(f'[Device] moving FOCUSIN')
+            elif direction == 0:
+                self.logger.info(f'[Device] moving FOCUSOUT')
+            return True           
+        else:
+            raise RuntimeError(f'[device] {resp}')         
 
     def stop(self) -> None:
         """Complements the HALT method"""
@@ -342,7 +364,7 @@ class FocuserDriver():
     
     def Halt(self) -> None:   
         """Send command STOP and stops main program with GS0=0 subroutine"""     
-        resp_stop = self._write("STOP", 5)
+        resp_stop = self._write("V42=1", 5)
         if resp_stop == 'OK':                 
             self.logger.info('[Device] halt')
             self.stop()
@@ -369,7 +391,7 @@ class FocuserDriver():
                     err = e
                 retries += 1
             self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
-            if "WinError" in err:
+            if "WinError" in str(err):
                 # If many retries were unsucessful, says the device is not connected
                 self._connected = False
             # print(f"Error writing ETH: {cmd}: {str(err)}")

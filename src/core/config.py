@@ -39,17 +39,18 @@ def create_default_toml_file():
         },
         "Device": {
             "absolute" : True,
-            "device_name" : 'Mirror2',
+            "device_name" : '2ndMirror',
             "deviceID" : '3285e9af-8d1d-4f9d-b368-d129d8e9a24b', # https://guidgenerator.com/online-guid-generator.aspx
             "device_ip" : '192.168.1.250',
             "device_port" : 5001,
-            "encoder2microns": 47.778,
-            "max_speed": 0,
-            "max_step" : 1000000,            
+            "encoder2microns": 17.5,
+            "max_speed": 500,
+            "max_step" : 50700,            
             "maxincrement": 0,
             "tempcompavailable": False,
             "temp_comp" : False,
             "speedFactor": 428,
+            "speed_security": 215000,
             "stepsize": 0
                         
         },
@@ -61,7 +62,7 @@ def create_default_toml_file():
         "Logging": {
                 "log_level" : 'INFO',
                 "log_to_stdout" : False,
-                "log_max_size_mb" : 5,
+                "log_max_size_mb" : 10,
                 "log_num_keep" : 10
                 }
     }
