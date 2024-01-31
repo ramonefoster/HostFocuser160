@@ -57,6 +57,7 @@ class App():
         self.status = {
             "absolute": Config.absolute,
             "alarm": 0,
+            "broker": "Focuser160",
             "cmd": {
                 "clientId": self._client_id,
                 "clientTransactionId": 0,
@@ -76,7 +77,8 @@ class App():
             "tempComp": Config.temp_comp,
             "tempCompAvailable": Config.tempcompavailable,
             "temperature": 0,
-            "timestamp": datetime.isoformat(datetime.now(), timespec='milliseconds')            
+            "timestamp": datetime.isoformat(datetime.now(), timespec='milliseconds'),
+            "version": "1.0.0"            
         }
         
         self.device = Focuser(self.logger)
