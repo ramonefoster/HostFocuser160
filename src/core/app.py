@@ -202,10 +202,10 @@ class App():
                 self._homing = True
                 self._is_moving = True
             else:
-                self.status["alarm"] = self.device.alarm()
+                self.status["alarm"] = self.device.alarm
             self.logger.info(f'Device Homing {res}')
         except Exception as e:
-            self.status["alarm"] = self.device.alarm()
+            self.status["alarm"] = self.device.alarm
             self.status["error"] = str(e)
             self.logger.error(f'Homing {e}')
             self.pub_status()
@@ -217,7 +217,7 @@ class App():
             self._is_moving = True # set _is_moving to true so the main loop can realy check if the motor is moving or not
             self.logger.info(f'Device Stopped')
         else:
-            self.status["alarm"] = self.device.alarm()
+            self.status["alarm"] = self.device.alarm
             self.logger.info(f'Halt Fail')
 
     def handle_speed(self, vel):
@@ -265,7 +265,7 @@ class App():
             time.sleep(.1)
             self._is_moving = True
         except Exception as e:
-            self.status["alarm"] = self.device.alarm()
+            self.status["alarm"] = self.device.alarm
             self.status["error"] = str(e)
             self.logger.error(f'Moving FOCUS IN | OUT')
             self.pub_status()
@@ -282,7 +282,7 @@ class App():
             time.sleep(.1)
             self._is_moving = True
         except Exception as e:
-            self.status["alarm"] = self.device.alarm()
+            self.status["alarm"] = self.device.alarm
             self.status["error"] = str(e)
             self.logger.error(f'Moving {pos}: {str(e)}')
             self.pub_status()

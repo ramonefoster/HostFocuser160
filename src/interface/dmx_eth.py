@@ -271,7 +271,7 @@ class FocuserDriver():
             self.logger.info('[Device] home: Success')
             return res  
         else:
-            alarm = self.alarm()
+            alarm = self.alarm
             if alarm == 1:
                 self.logger.error('[Device] home: Failed and Alarm flag is up')
 
@@ -301,13 +301,12 @@ class FocuserDriver():
                 self.logger.info(f'[Device] move={str(position)}')
                 return
             else:
-                alarm = self.alarm()
+                alarm = self.alarm
                 if alarm == 1:
                     self.logger.error('[Device] Move Failed and Alarm flag is up')
-                raise RuntimeError(f'Error: {resp}')
+                raise RuntimeError(f'[Device] Error: {resp}')
         else:
-            self.alarm()
-            raise RuntimeError(f'Error: {resp}') 
+            raise RuntimeError(f'[Device] Error: {resp}') 
 
     def speed(self, vel: int):  
         """Sets the speed of the motor
