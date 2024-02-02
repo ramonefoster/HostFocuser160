@@ -321,6 +321,12 @@ class App():
             if -15 > (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) > 15:                
                 self.pub_status()
                 self.last_pub = current_time
+                if not self.device.connected:
+                    try:
+                        self.logger.info("Trying to reconnect to device.")
+                        self.device.connected = True
+                    except:
+                        self.logger.error("Reconnection to device failed.")
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
                 if socks.get(self.puller) == zmq.POLLIN:

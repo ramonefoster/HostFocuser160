@@ -64,7 +64,7 @@ class FocuserDriver():
         self._lock.release()
         return res
     @connected.setter
-    def connected(self, connected: bool, max_retries=3, delay=.1):
+    def connected(self, connected: bool, max_retries=5, delay=.1):
         """Connects the device and open socket connection
         Args:
             connected (bool): Sets the connected state
@@ -150,7 +150,7 @@ class FocuserDriver():
         """Device enconders position"""      
         try:
             self._lock.acquire()
-            step = int(self._write("EX", max_retries=3)) 
+            step = int(self._write("EX", max_retries=5)) 
             # if step >= 0:
             #     conv_position = int(self._interp_func(step))
             # elif step < 0:
@@ -172,7 +172,7 @@ class FocuserDriver():
     def is_moving(self) -> bool:
         """Checks if device is moving"""
         self._lock.acquire()
-        x = self._write("V46", max_retries=3)
+        x = self._write("V46", max_retries=5)
         if x == "1":
             self._is_moving = True
             self._lock.release()
@@ -188,7 +188,7 @@ class FocuserDriver():
     def homing(self) -> bool:
         """Check if INIT routine is being executed"""
         self._lock.acquire()
-        x = self._write("V44", max_retries=3)
+        x = self._write("V44", max_retries=5)
         if "0" in x:
             self._homing = True
         else:
@@ -200,7 +200,7 @@ class FocuserDriver():
     def initialized(self) -> bool:
         """Checks if initialization was previously executed"""
         self._lock.acquire()
-        x = self._write("V44", max_retries=3)
+        x = self._write("V44", max_retries=5)
         if "64" in x:
             self._initialized = True
         else:
@@ -245,7 +245,7 @@ class FocuserDriver():
     
     @property
     def alarm(self) -> int:
-        res = self._write("ALM", max_retries=3)
+        res = self._write("ALM", max_retries=5)
         try:
             self._alarm = int(res)
             if self._alarm == '1':
@@ -266,7 +266,7 @@ class FocuserDriver():
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
 
-        res = self._write("GS30", max_retries=3)
+        res = self._write("GS30", max_retries=5)
         if res == 'OK':
             self.logger.info('[Device] home: Success')
             return res  
@@ -294,9 +294,9 @@ class FocuserDriver():
             raise RuntimeError('Invalid Target')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
-        resp = self._write(f"V20={pos_conv}", max_retries=3)
+        resp = self._write(f"V20={pos_conv}", max_retries=5)
         if "OK" in resp:            
-            resp = self._write(f"GS29", max_retries=3)
+            resp = self._write(f"GS29", max_retries=5)
             if "OK" in resp:
                 self.logger.info(f'[Device] move={str(position)}')
                 return
@@ -322,7 +322,7 @@ class FocuserDriver():
         #     raise RuntimeError('Invalid Steps') 
         if vel_conv > Config.speed_security:
             vel_conv = Config.speed_security       
-        resp = self._write(f"V21={vel_conv}", max_retries=3)
+        resp = self._write(f"V21={vel_conv}", max_retries=5)
         if "OK" in resp: 
             self.logger.info(f'[Device] speed={str(vel)}')
             return True           
@@ -341,7 +341,7 @@ class FocuserDriver():
         if direction != 1 and direction != 0:
             return
         else:
-            resp = self._write(f"GS2{str(direction)}", max_retries=3)
+            resp = self._write(f"GS2{str(direction)}", max_retries=5)
         if "OK" in resp: 
             if direction == 1:                
                 self.logger.info(f'[Device] moving FOCUSIN')
@@ -370,7 +370,7 @@ class FocuserDriver():
             return True  # Command executed successfully 
         return False        
     
-    def _write(self, cmd, max_retries = 0):
+    def _write(self, cmd, max_retries = 5):
         """Send commands to device socket.
         Args:  
             cmd (str): Command.
