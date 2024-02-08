@@ -8,7 +8,7 @@
 ;
 ; Current version number stored on V33.
 ;
-; VERSION 20231215
+; VERSION 20240108
 ; ================
 ;
 ; INSTRUCTIONS
@@ -73,13 +73,11 @@ PRG 0	; HARDWARE MECHANISM IDENTIFICATION
 ; V46: Running status. =0 for READY, =1 for BUSY, or error code otherwise.
 ; V50: Mechanism hardware ID, set by S4DMX.
 ; --------------------------------------------
-	V33 = 20231215		; Current S4DMX version.
-;	V46 = 1			 			; Set start SUB code
+	V33 = 20240108		; Current S4DMX version.
 	V50 = 64					; Set ID=64 for unplugged motor
 	V49 = 64					; ICS sets V49 = V50 to enable movements
 	V44 = 0						; Clear INIT flag of all mechanisms
 	; Testar conexao uswitchs ?
-;	V46 = 0						; Set end SUB code
 END									; End Program 0
 ;
 ;=====================
@@ -147,16 +145,16 @@ SUB 29	; FOCUS PROTOTYPE GOTO
 ;--------------------
 ; V20: target position (set by ICS)
 ; V44: flag bit (V44&1) initialization routine done
-; V71: Maximum position in encoder units
-; V74: number of overtravel pulses to eliminate backlash4
+; V71: Maximum position in encoder units = 2165440 : 50500 um
+; V74: number of overtravel pulses to eliminate backlash
+; V74 = 8576 encoder units equivalent to a displacement of 200um on 2nd mirror
 ;
 	V46 = 1			 			; Set start SUB code
-	V71 = 94000				; Maximum target position (encoder units)
-	V74 = 1000				; # overtravel encoder displacement to eliminate backlash. (1 rev)
+	V71 = 2165440			; Maximum target position (encoder units)
+	V74 = 8576				; # overtravel encoder displacement to eliminate backlash. (1 rev)
 	; Check for input position range
 	V1 = V20					; Position entry
 	V2 = EX						; Current motor position
-	V2 = -1 * V2
 	IF V1 <= 0
 		; Out of range
 		V46 = 172				; Set Parameter low value error code
@@ -178,27 +176,37 @@ SUB 29	; FOCUS PROTOTYPE GOTO
 	ENDIF
 	ABS								; Select absolute mode
 	EO = 1						; Enable motor driver
-	HSPD = 10000
-	LSPD = 500
+	HSPD = 250000			; Equivalent to 500 microns/second
+	LSPD = 10000
+	ACC = 300
+	DEC = 300
 	IF V1 < V2
 		; Target position less than current position: overtravel
 		V3 = V1 - V74
 		IF V3 <= V74
 			; Target position near HOME position. Re-init and then go
-			LHOMEX+
+			JOGX-					; Move until LIM- activation
+			; Check for STOP command here
 			WAITX
-			; HOME with encoder Z index 
-			ZOMEX-
-			WAITX
+			; HOME with Z index 
 			ECLEARX				; Clear any motor error
+			V11 = MSTX
+			V5 = V11 & 16
+			WHILE V5 > 0
+				ZOMEX+
+				WAITX
+				V11 = MSTX
+				V5 = V11 & 16
+			ENDWHILE 
 		ELSE
-			V10 = -10 * V3; Convert CCW and encoder unit to step unit
+			V10 = 10 * V3	; Convert encoder unit to step unit
 			XV10					; Start movement
 			WAITX					; Wait for end of movement
 		ENDIF
 	ENDIF
-	V10 = -10 * V1		; Convert encoder unit to CCW and step unit
+	V10 = 10 * V1			; Convert encoder unit to step unit
 	XV10							; Start movement
+	; Check for STOP command here
 	WAITX							; Wait for end of movement
 	EO = 0						; Disable motor driver
 	V46 = 0			 			; Set end SUB code
@@ -210,7 +218,7 @@ SUB 30	; FOCUS PROTOTYPE INIT
 ;=============================
 ; 			SUB 31 REQUIRED
 ;
-;				MECANISMO PROTÃ³TIPO:
+;				MECANISMO PROTóTIPO:
 ;       -------------------
 ;				Reduction: 13,8191 um/rev. Rnge: 0 to ~1500 um  Resolution = 0,398 um/step (50 ustep/step)
 ;				After INIT, the focuser position = 1, so 94 motor revolutions are needed reach final position
@@ -228,14 +236,21 @@ SUB 30	; FOCUS PROTOTYPE INIT
 	V44 = 0
 	; HOME with LIM+ switch
 	EO = 1						; Enable motor driver
-	HSPD = 10000
-	LSPD = 500
-	LHOMEX+
+	HSPD = 250000			; Equivalent to 500 microns/second
+	LSPD = 10000
+	ACC = 100
+	JOGX-							; Move until LIM- activation
 	WAITX
-	; HOME with encoder Z index 
-	ZOMEX-
-	WAITX
+	; HOME with Z index 
 	ECLEARX						; Clear any motor error
+	V11 = MSTX
+	V5 = V11 & 16
+	WHILE V5 > 0
+		ZOMEX+
+		WAITX
+		V11 = MSTX
+		V5 = V11 & 16
+	ENDWHILE 
 	V44 = V50					; Set INIT executed flag
 	EO = 0						; Disable motor driver
 	V46 = 0			 			; Set end SUB code
