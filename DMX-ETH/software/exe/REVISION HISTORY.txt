@@ -1,0 +1,17 @@
+101 - First Revision
+102 - Added Ethernet Support
+103 - Added USB support for models other than PMX-4EX-SA
+    - Updated README file 
+104 - Fixed bug: Property Error during clear flash operation
+    - Fixed bug: Serial communication not working
+105 - Added extra delay for RS-232 communication
+    - Display stand-alone command during download/clear/upload
+    - Centered download progress label
+    - Fixed bug: Total lines downloaded was being over estimated by 1.
+    - Fixed bug: Program crash up size of program is at the maximum
+106 - Added Response Type [RT] handling to RS-485 communication.
+107 - Added support for 7650 lines
+	Fixed bug: downloader does not work properly if program is at flash boundary [Ethernet mode only]
+108 - Support for PMX-4EX-BD
+109 - Added DoEvents command to prevent software from locking up
+110 - Compensate for reading responses with NUL characters appended
