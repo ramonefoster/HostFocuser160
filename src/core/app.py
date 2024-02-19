@@ -318,7 +318,8 @@ class App():
         while not self.stop_var:
             t0 = time.time()
             current_time = datetime.now()
-            if -15 > (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) > 15:                
+            if -15 > (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) > 15:  
+                self.device.position              
                 self.pub_status()
                 self.last_pub = current_time
                 if not self.device.connected:
@@ -396,5 +397,6 @@ class App():
                 if (current_time - self.last_ping_time).total_seconds() >= 15:
                     self.reachable = self.ping_server()
                     self.last_ping_time = current_time
+                self.status["connected"] = self.device.connected
             self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"
 

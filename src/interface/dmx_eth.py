@@ -86,8 +86,12 @@ class FocuserDriver():
                     connected_successfully = True
                 except Exception as e:
                     self.logger.error(f'Connection attempt {retries + 1} failed: {e}')
-                    retries += 1
+                    retries += 1                    
                     time.sleep(delay)
+                    if retries >=4:
+                        self._lock.acquire()
+                        self._connected = False
+                        self._lock.release()
 
             if not connected_successfully:
                 self._lock.acquire()
@@ -97,6 +101,7 @@ class FocuserDriver():
                 raise RuntimeError('Cannot Connect')
 
         else:
+            self._connected = False
             self._lock.release()
             self.disconnect()
 
@@ -159,6 +164,7 @@ class FocuserDriver():
             # else:
             #     return self._last_pos
             # self._position = conv_position
+            print("[DEBUG] Encode Position: ", step)
             self._position = int(round(step/Config.enc_2_microns))
             self._last_pos = self._position
             self._lock.release()

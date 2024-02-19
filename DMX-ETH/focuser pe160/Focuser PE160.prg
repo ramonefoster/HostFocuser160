@@ -269,7 +269,7 @@ SUB 29	; FOCUS GOTO
 	; Check for input position range
 	V1 = V20					; Position entry
 	V2 = EX						; Current motor position
-	IF V1 <= 0
+	IF V1 < 0
 		; Out of range
 		V46 = 172				; Set Parameter low value error code
 		SR0 = 0					; End Sub (turn off Program 0)

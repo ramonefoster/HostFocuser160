@@ -125,6 +125,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
         self.update_timer.timeout.connect(self.update)
         self.update_timer.start(100)
 
+        self.reachable = False
+
         self.run_thread = None
         self.statusBar().showMessage("Ready")
 
@@ -204,8 +206,10 @@ class FocuserOPD(QtWidgets.QMainWindow):
         """Checks if device is reachable"""
         if self.control.reachable:
             self.lblPing.setText("Device is Reachable")
+            self.reachable = True
         else:
             self.lblPing.setText("Device is NOT Reachable")
+            self.reachable = False
         
     def update(self):   
         """Main loop and UI manager"""     
@@ -218,7 +222,13 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.statusBar().setStyleSheet("background-color: indianred")
         if con:
             self.statusBar().showMessage("Device Socket Connected")
+            if not self.reachable:
+                self.lblPing.setText("Device is Reachable")
+                self.reachable = True
         else:
+            if self.reachable:
+                self.lblPing.setText("Device is NOT Reachable")
+                self.reachable = False
             self.statusBar().showMessage("Device Socket Disconnected")
         self.lblPos.setText(str(status["position"]))
         self.txtClientID.setText(str(self.control.busy_id))
