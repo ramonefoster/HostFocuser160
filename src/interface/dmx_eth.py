@@ -164,7 +164,6 @@ class FocuserDriver():
             # else:
             #     return self._last_pos
             # self._position = conv_position
-            print("[DEBUG] Encode Position: ", step)
             self._position = int(round(step/Config.enc_2_microns))
             self._last_pos = self._position
             self._lock.release()
@@ -296,7 +295,7 @@ class FocuserDriver():
         pos_conv = int(round((Config.enc_2_microns * position), 0))
         if self._is_moving:
             raise RuntimeError('Cannot start a move while the focuser is moving')
-        if 0 >= position >= self._max_step:
+        if 0 >= position or position >= self._max_step:
             raise RuntimeError('Invalid Target')
         if self._temp_comp:
             raise RuntimeError('Invalid TempComp')        
