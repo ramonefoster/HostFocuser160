@@ -88,8 +88,9 @@ class App():
     def reach_device(self):
         """Ping device and reads the position and initialized variables"""
         _try = 0
+        self.last_ping_time = datetime.now()
         for _try in range(5):
-            self.reachable = self.ping_server()
+            self.reachable = self.ping_server()            
             if self.reachable:
                 break
             _try += 1
@@ -100,6 +101,7 @@ class App():
                 self._position =self.device.position
                 self.status["position"] = self._position
                 self.status["initialized"] = self.device.initialized
+                self.logger.info(f'Device Reached.')
             except Exception as e:
                 self.logger.error(f'Error reaching device: {str(e)}') 
 
@@ -293,7 +295,7 @@ class App():
         if self._is_moving != self.previous_is_mov:
             self.status["isMoving"] = self._is_moving
             self.previous_is_mov = self._is_moving 
-            self.status["initialized"] = self.device.initialized           
+            self.status["initialized"] = self.device.initialized
             self.pub_status()
 
         if self._homing != self.previous_homing:
@@ -377,7 +379,7 @@ class App():
                 if self._is_moving:
                     self._is_moving = self.device.is_moving
                     self._position = self.device.position
-                if self._homing:                   
+                if self._homing:
                     self._homing = self.device.homing 
                     # self._position = self.device.position 
                 if not self._homing and not self._is_moving:
@@ -394,9 +396,8 @@ class App():
                 self.update_status()                
                 self.status["alarm"] = 0
             else:
-                if (current_time - self.last_ping_time).total_seconds() >= 15:
-                    self.reachable = self.ping_server()
-                    self.last_ping_time = current_time
+                if (current_time - self.last_ping_time).total_seconds() >= 10:
+                    self.reach_device()
                 self.status["connected"] = self.device.connected
             self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"
 

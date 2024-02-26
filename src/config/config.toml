@@ -1,37 +1,34 @@
 title = "Focuser160MQ"
 
 [General]
-name = 'Controlador Focalizador 160'
-version = '0.1.0'
-description = 'Interface for Perkin-Elmer Focuser'
+name = "Focuser160"
+version = "0.1.0"
+description = "Interface for Perkin-Elmer Focuser"
 startup = true
 
 [Device]
 absolute = true
-device_name = 'Mirror2'
+device_name = '2ndMirror'
 deviceID = '3285e9af-8d1d-4f9d-b368-d129d8e9a24b' # https://guidgenerator.com/online-guid-generator.aspx
-device_ip = '192.168.1.223'
+device_ip = '192.168.1.233'
 device_port = 5001
-max_step = 84000
-max_speed = 0
-maxincrement = 0
+encoder2microns = 42.2047244
+max_step = 50700 # microns
+max_speed = 500 # microns/sec
+max_increment = 0
 tempcompavailable = false
 temp_comp = false
-stepsize = 0
-encoder2microns = 47.778
+speed_security = 215000
+speedFactor = 428 # Converts units in microns to motor units
+step_size = 0
 
 [Network]
-ip_address = '192.168.1.100'
+ip_address = "200.131.64.237"
 port_pub = 7001
 port_pull = 7002
 
-[Database]
-db_name = 'db_name'
-db_user = 'username'
-db_password = 'password'
-
 [Logging]
-log_level = 'INFO'
+log_level = "INFO"
 log_to_stdout = false
-log_max_size_mb = 5
+log_max_size_mb = 10
 log_num_keep = 10
