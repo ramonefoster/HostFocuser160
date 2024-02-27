@@ -232,6 +232,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
                 self.reachable = False
             self.statusBar().showMessage("Device Socket Disconnected")
         self.lblPos.setText(str(status["position"]))
+        self.lblEnc.setText(str(self.control.encoder))
         self.txtClientID.setText(str(self.control.busy_id))
         self.lblCommSpeed.setText(str(self.control.connection_speed))
         if len(status["error"]) > 1:

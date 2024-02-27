@@ -52,6 +52,7 @@ class App():
         self._client_id = 0
         self.busy_id = 0
         self._current_speed = Config.max_speed
+        self.encoder = 0
 
         # Status Message
         self.status = {
@@ -307,6 +308,7 @@ class App():
             self.status["position"] = self._position
             self.previous_pos = self._position
             self.pub_status()
+            self.encoder = int(self._position * Config.enc_2_microns)
         
         # if self._is_moving and self._homing:
         #     self.status["clientId"] = 0
