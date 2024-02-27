@@ -158,6 +158,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         """Start server"""
         if self.run_thread and self.run_thread.is_alive():
             print("Still Alive")
+            return
         self.run_thread = Thread(target = self.control.run)
         self.run_thread.start()
         # self.run_thread.daemon = True
