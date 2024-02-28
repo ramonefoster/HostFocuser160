@@ -90,6 +90,7 @@ class App():
         """Ping device and reads the position and initialized variables"""
         _try = 0
         self.last_ping_time = datetime.now()
+        print("Trying Reconnect")
         for _try in range(5):
             self.reachable = self.ping_server()            
             if self.reachable:
@@ -325,13 +326,7 @@ class App():
             if -15 > (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) > 15:  
                 self.device.position              
                 self.pub_status()
-                self.last_pub = current_time
-                if not self.device.connected:
-                    try:
-                        self.logger.info("Trying to reconnect to device.")
-                        self.device.connected = True
-                    except:
-                        self.logger.error("Reconnection to device failed.")
+                self.last_pub = current_time                
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
                 if socks.get(self.puller) == zmq.POLLIN:
@@ -398,7 +393,7 @@ class App():
                 self.update_status()                
                 self.status["alarm"] = 0
             else:
-                if (current_time - self.last_ping_time).total_seconds() >= 10:
+                if (current_time - self.last_ping_time).total_seconds() >= 7:
                     self.reach_device()
                 self.status["connected"] = self.device.connected
             self.connection_speed = f"interval:  {round(time.time()-t0, 3)}"

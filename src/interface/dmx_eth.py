@@ -81,6 +81,7 @@ class FocuserDriver():
             while retries < max_retries and not connected_successfully:
                 try:
                     self.motor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.motor_socket.settimeout(.6)
                     self.motor_socket.connect((Config.device_ip, Config.device_port))                    
                     time.sleep(delay)
                     connected_successfully = True
@@ -394,6 +395,7 @@ class FocuserDriver():
                 except Exception as e:
                     err = e
                 retries += 1
+            self._connected = False
             self.logger.error(f"[Device] Error writing {cmd}: {str(err)}")
             if "WinError" in str(err):
                 # If many retries were unsucessful, says the device is not connected
