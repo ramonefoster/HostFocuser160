@@ -294,6 +294,12 @@ class App():
     def update_status(self):
         """Verifies if there is a change in state variables, 
         such as _is_moving, _homing and _position and publishes in ZeroMQ"""
+        if self._position != self.previous_pos:
+            self.status["position"] = self._position
+            self.previous_pos = self._position
+            self.pub_status()
+            self.encoder = int(self._position * Config.enc_2_microns)
+
         if self._is_moving != self.previous_is_mov:
             self.status["isMoving"] = self._is_moving
             self.previous_is_mov = self._is_moving 
@@ -305,12 +311,6 @@ class App():
             self.previous_homing = self._homing
             self.pub_status()
 
-        if self._position != self.previous_pos:
-            self.status["position"] = self._position
-            self.previous_pos = self._position
-            self.pub_status()
-            self.encoder = int(self._position * Config.enc_2_microns)
-        
         # if self._is_moving and self._homing:
         #     self.status["clientId"] = 0
 
@@ -375,6 +375,7 @@ class App():
 
                 if self._is_moving:
                     self._is_moving = self.device.is_moving
+                    time.sleep(.05)
                     self._position = self.device.position
                 if self._homing:
                     self._homing = self.device.homing 
