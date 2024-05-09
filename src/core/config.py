@@ -46,12 +46,12 @@ def create_default_toml_file():
             "encoder2microns": 42.2047244,
             "max_speed": 500,
             "max_step" : 50700,            
-            "maxincrement": 0,
+            "max_increment": 0,
             "tempcompavailable": False,
             "temp_comp" : False,
             "speedFactor": 428,
             "speed_security": 215000,
-            "stepsize": 0
+            "step_size": 0
                         
         },
         "Network" : {
