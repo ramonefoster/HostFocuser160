@@ -11,7 +11,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox, QMenu, QSystemTrayIcon, QAction
 
 import sys
-import time
 import os
 from threading import Thread
 from src.core.log import init_logging

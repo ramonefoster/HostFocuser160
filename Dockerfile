@@ -1,9 +1,9 @@
-FROM python:3.11
+FROM python:3.10.12
 
 # stdout and stderr streams directly
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 # Do not write .pyc bytecode files to disk
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 # Set the working directory in the container
 WORKDIR /focuser160
