@@ -26,7 +26,7 @@ class App():
     def __init__(self, logger: Logger):
 
         self.logger = logger
-        self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
+        self.config_file = r"src/config/config.toml"
 
         # Network Settings
         self.context = None
