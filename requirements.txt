@@ -1,3 +1,4 @@
 toml==0.10.2
 PyQt5==5.15.10
 pyzmq==25.1.2
+opencv-python-headless

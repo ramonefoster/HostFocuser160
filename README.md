@@ -50,3 +50,8 @@ Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros ad
 <b>temperature: DOUBLE</b> temperatura do dispositivo (futura implementação).\
 <b>timestamp: DOUBLE</b> Data/hora da resposta em formato de timestamp.\
 <b>position: DOUBLE</b> Posição atual do Focalizador em mícrons.
+
+## RUN on DOCKER:
+docker run -it --rm \
+-e DISPLAY=host.docker.internal:0 \
+-v /tmp/.X11-unix:/tmp/.X11-unix focuser160
