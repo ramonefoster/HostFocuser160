@@ -51,7 +51,15 @@ Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros ad
 <b>timestamp: DOUBLE</b> Data/hora da resposta em formato de timestamp.\
 <b>position: DOUBLE</b> Posição atual do Focalizador em mícrons.
 
+## Server X
+Para executar um aplicativo GUI em um contêiner Docker, você precisará configurar o Docker para utilizar um servidor X para que o aplicativo possa exibir a interface gráfica no HOST. 
+
+Em um sistema Linux, você pode usar o servidor X padrão (Xorg) que geralmente já está instalado. No Windows, você pode usar um servidor X como o Xming ou o VcXsrv.
+
 ## RUN on DOCKER:
 docker run -it --rm \
--e DISPLAY=host.docker.internal:0 \
--v /tmp/.X11-unix:/tmp/.X11-unix focuser160
+--env DISPLAY=host.docker.internal:0 \
+--volume tempX11/tmp/.X11-unix \
+--volume focuser_log:/focuser160/logs \
+--volume focuser_config:/focuser160/src/config \
+focuser160:v1
