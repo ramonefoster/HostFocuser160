@@ -113,18 +113,27 @@ class App():
         print('Context Created')
 
         try:
+            ip_addrs = []
             # Status Publisher
             self.publisher = self.context.socket(zmq.PUB)
-            self.publisher.bind(f"tcp://{self.ip_address}:{self.port_pub}")
+            self.publisher.bind(f"tcp://*:{self.port_pub}")
+            for ip in socket.gethostbyname_ex(socket.gethostname())[2]:
+                if not ip.startswith("127"):
+                    ip_addrs.append(ip)
+            if len(ip_addrs) > 0:
+                self.ip_address = ip_addrs[-1]
+            else:
+                self.ip_address = '127.0.0.1'
             print(f"Publisher binded to {self.ip_address}:{self.port_pub}")
         except Exception as e:
+            self.ip_address = 'Bind Err'
             self.logger.error(f'Error Binding Publihser: {str(e)}')
             return
 
         try:
             # Command Pull
             self.puller = self.context.socket(zmq.PULL)
-            self.puller.bind(f"tcp://{self.ip_address}:{self.port_pull}")
+            self.puller.bind(f"tcp://*:{self.port_pull}")
             print(f"Pull binded to {self.ip_address}:{self.port_pull}")
         except Exception as e:
             self.logger.error(f'Error Binding Puller: {str(e)}')
@@ -142,12 +151,12 @@ class App():
         self.status["connected"] = self.device.connected
         self.pub_status()
         try:
-            self.publisher.unbind(f"tcp://{self.ip_address}:{self.port_pub}")
+            self.publisher.unbind(f"tcp://*:{self.port_pub}")
             self.logger.info(f'Disconnecting Publisher')
         except Exception as e:
             self.logger.error(f'Error closing Publisher connection: {str(e)}')
         try:
-            self.puller.unbind(f"tcp://{self.ip_address}:{self.port_pull}")
+            self.puller.unbind(f"tcp://*:{self.port_pull}")
             self.logger.info(f'Disconnecting Puller')
         except Exception as e:
             self.logger.error(f'Error closing Puller connection: {str(e)}')
