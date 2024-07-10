@@ -59,7 +59,8 @@ Em um sistema Linux, você pode usar o servidor X padrão (Xorg) que geralmente 
 ## RUN on DOCKER:
 docker run -it --rm \
 --env DISPLAY=host.docker.internal:0 \
---volume tempX11/tmp/.X11-unix \
+-p your_host_ip:pub_port:pub_port \
+-p your_host_ip:pull_port:pull_port \
 --volume focuser_log:/focuser160/logs \
 --volume focuser_config:/focuser160/src/config \
 focuser160:v1
