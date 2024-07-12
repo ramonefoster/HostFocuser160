@@ -28,7 +28,8 @@ Os clientes devem enviar comandos no seguinte formato JSON:\
 Substitua <b>NOME_DO_COMANDO</b> pelo comando desejado e forneça parâmetros adicionais conforme necessário. <b>NOME_DO_COMANDO</b> deve ser todo maiúsculo.
 <h3>Do Alpaca:</h3> 
 <p><b>clientId:</b> Client's unique ID. (1 to 4294967295). The client should choose a value at start-up, e.g. a random value between 1 and 65535, and send this on every transaction to associate entries in device logs with this particular client. Zero is a reserved value that clients should not use.</p>
-<b>clientTransactionId:</b> Client's transaction ID. (1 to 4294967295). The client should start this count at 1 and increment by one on each successive transaction. This will aid associating <p>entries in device logs with corresponding entries in client side logs. Zero is a reserved value that clients should not use.</p>
+<p><b>clientTransactionId:</b> Client's transaction ID. (1 to 4294967295). The client should start this count at 1 and increment by one on each successive transaction. This will aid associating entries in device logs with corresponding entries in client side logs. Zero is a reserved value that clients should not use.
+</p>
 
 ## Resposta do Servidor - Status do Focuser
 <p>Ao enviar uma solicitação ao controlador, a resposta contém uma STRING que pode ser convertida para um objeto <b>JSON</b> com informações atualizadas sobre o estado do dispositivo. Aqui está a descrição de cada campo presente na resposta:<p>
