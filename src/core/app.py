@@ -104,7 +104,7 @@ class App():
 
     def start_server(self): 
         """ Starts Server ZeroMQ, creating context 
-        then binding PUB and PULL sockets"""
+        then binding PUB and REP sockets"""
 
         if self.context:    
             return  
@@ -122,10 +122,10 @@ class App():
             return
 
         try:
-            # Command Pull
+            # Command REP
             self.replier = self.context.socket(zmq.REP)
             self.replier.bind(f"tcp://{self.ip_address}:{self.port_rep}")
-            print(f"Pull binded to {self.ip_address}:{self.port_rep}")
+            print(f"REP binded to {self.ip_address}:{self.port_rep}")
         except Exception as e:
             self.logger.error(f'Error Binding Replier: {str(e)}')
             return
@@ -325,15 +325,15 @@ class App():
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
                 if socks.get(self.replier) == zmq.POLLIN:
-                    msg_pull = self.replier.recv_string()
+                    msg_rep = self.replier.recv_string()
                     try:
-                        msg_pull = json.loads(msg_pull)
-                        cmd = msg_pull.get("action") 
-                        if not 'STATUS' in cmd and (msg_pull.get("clientId") == self._client_id or self._client_id == 0):
+                        msg_rep = json.loads(msg_rep)
+                        cmd = msg_rep.get("action") 
+                        if not 'STATUS' in cmd and (msg_rep.get("clientId") == self._client_id or self._client_id == 0):
                             # Only accept commands (except for status request) if not busy or if it 
                             # was requested by the same client
-                            self.status["cmd"] = msg_pull
-                            self._client_id = msg_pull.get("clientId") 
+                            self.status["cmd"] = msg_rep
+                            self._client_id = msg_rep.get("clientId") 
                     except Exception as e:
                         print(e)
                     try:
