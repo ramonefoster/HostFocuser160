@@ -65,7 +65,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
         try:
             self.ip_addr = Config.ip_address  
             self.port_pub = Config.port_pub  
-            self.port_pull = Config.port_pull 
+            self.port_req = Config.port_rep
             return True
         except:
             return False
@@ -80,44 +80,44 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.poller = zmq.Poller()
         self.poller.register(self.subscriber, zmq.POLLIN)
 
-        self.pusher = self.context.socket(zmq.PUSH)
-        self.pusher.connect(f"tcp://{Config.ip_address}:{Config.port_pull}")
+        self.req = self.context.socket(zmq.REQ)
+        self.req.connect(f"tcp://{Config.ip_address}:{Config.port_req}")
     
     def connect(self):
         self._msg_json["action"] = "CONNECT"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        self.req.send_string(json.dumps(self._msg_json))
     
     def home(self):
         self._msg_json["action"] = "HOME"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        self.req.send_string(json.dumps(self._msg_json))
     
     def disconnect(self):
         self._msg_json["action"] = "DISCONNECT"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        self.req.send_string(json.dumps(self._msg_json))
     
     def halt(self):
         self._msg_json["action"] = "HALT"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        self.req.send_string(json.dumps(self._msg_json))
 
     def move_to(self):
         if not self.is_moving:
             pos = self.txtMov.text()
             self._msg_json["action"] = F"MOVE={pos}"
-            self.pusher.send_string(json.dumps(self._msg_json))
+            self.req.send_string(json.dumps(self._msg_json))
     
     def move_in(self):
         if not self.is_moving:
             self._msg_json["action"] = F"FOCUSIN=200"
-            self.pusher.send_string(json.dumps(self._msg_json))
+            self.req.send_string(json.dumps(self._msg_json))
     
     def move_out(self):
         if not self.is_moving:
             self._msg_json["action"] = F"FOCUSOUT=200"
-            self.pusher.send_string(json.dumps(self._msg_json))
+            self.req.send_string(json.dumps(self._msg_json))
     
     def get_status(self):
         self._msg_json["action"] = "STATUS"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        self.req.send_string(json.dumps(self._msg_json))
     
     def update(self):
         if round(time.time()%35) == 0:

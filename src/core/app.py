@@ -27,7 +27,7 @@ class App():
         self.context = None
         self.ip_address = Config.ip_address
         self.port_pub = Config.port_pub
-        self.port_pull = Config.port_pull
+        self.port_rep = Config.port_rep
         self.poller = None
         self.connection_speed = 0
 
@@ -123,16 +123,16 @@ class App():
 
         try:
             # Command Pull
-            self.puller = self.context.socket(zmq.PULL)
-            self.puller.bind(f"tcp://{self.ip_address}:{self.port_pull}")
-            print(f"Pull binded to {self.ip_address}:{self.port_pull}")
+            self.replier = self.context.socket(zmq.REP)
+            self.replier.bind(f"tcp://{self.ip_address}:{self.port_rep}")
+            print(f"Pull binded to {self.ip_address}:{self.port_rep}")
         except Exception as e:
-            self.logger.error(f'Error Binding Puller: {str(e)}')
+            self.logger.error(f'Error Binding Replier: {str(e)}')
             return
 
         # Poller
         self.poller = zmq.Poller()
-        self.poller.register(self.puller, zmq.POLLIN)        
+        self.poller.register(self.replier, zmq.POLLIN)        
         self.logger.info(f'Server Started')
         self.pub_status()
     
@@ -147,10 +147,10 @@ class App():
         except Exception as e:
             self.logger.error(f'Error closing Publisher connection: {str(e)}')
         try:
-            self.puller.unbind(f"tcp://{self.ip_address}:{self.port_pull}")
-            self.logger.info(f'Disconnecting Puller')
+            self.replier.unbind(f"tcp://{self.ip_address}:{self.port_rep}")
+            self.logger.info(f'Disconnecting Replier')
         except Exception as e:
-            self.logger.error(f'Error closing Puller connection: {str(e)}')
+            self.logger.error(f'Error closing Replier connection: {str(e)}')
         
         self.context.destroy()
         self.context = None
@@ -173,7 +173,7 @@ class App():
         """Stop main loop and unregister zmq.POLL"""
         self.stop_var = True
         if self.poller:
-            self.poller.unregister(self.puller)
+            self.poller.unregister(self.replier)
             self.poller = None
             time.sleep(.2)
     
@@ -324,8 +324,8 @@ class App():
                 self.last_pub = current_time                
             if self.device and self.device.connected and self.poller:
                 socks = dict(self.poller.poll(50))
-                if socks.get(self.puller) == zmq.POLLIN:
-                    msg_pull = self.puller.recv_string()
+                if socks.get(self.replier) == zmq.POLLIN:
+                    msg_pull = self.replier.recv_string()
                     try:
                         msg_pull = json.loads(msg_pull)
                         cmd = msg_pull.get("action") 
@@ -349,18 +349,23 @@ class App():
 
                         if "MOVE=" in cmd and self.busy_id == 0:
                             self.handle_move(cmd[5:], Config.max_speed)
+                            self.replier.send_string('ACK')
                         
                         if "FOCUSIN" in cmd and self.busy_id == 0:
                             self.handle_in_out(1, cmd[8:])
+                            self.replier.send_string('ACK')
                         
                         if "FOCUSOUT" in cmd and self.busy_id == 0:
                             self.handle_in_out(0, cmd[9:])
+                            self.replier.send_string('ACK')
                         
                         if "HALT" in cmd and (self._client_id == self.busy_id or self.busy_id == 0):
                             self.handle_halt()
+                            self.replier.send_string('ACK')
 
                         if cmd in command_handlers and self.busy_id == 0:
                             command_handlers[cmd]()
+                            self.replier.send_string('ACK')
 
                         self.status["connected"] = self.device.connected
 

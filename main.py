@@ -62,7 +62,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         dock_y = main_window_geometry.y()
         
         self.lblIP.setText(f"IP: {self.control.ip_address}")
-        self.lblPort.setText(f"PUB {self.control.port_pub}, PULL {self.control.port_pull}")
+        self.lblPort.setText(f"PUB {self.control.port_pub}, REPLY {self.control.port_rep}")
 
         # LOG FILE
         self.log_text_edit = QtWidgets.QTextEdit()  # Widget to display log

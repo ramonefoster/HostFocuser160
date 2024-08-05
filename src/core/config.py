@@ -30,7 +30,7 @@ class Config:
     # ---------------
     ip_address: str = get_toml('Network', 'ip_address')
     port_pub: int = get_toml('Network', 'port_pub')
-    port_pull: int = get_toml('Network', 'port_pull')
+    port_rep: int = get_toml('Network', 'port_rep')
     # --------------
     # Device Section
     # --------------

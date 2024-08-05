@@ -25,7 +25,8 @@ step_size = 0
 [Network]
 ip_address = "200.131.64.237"
 port_pub = 7001
-port_pull = 7002
+port_rep = 7003
+
 
 [Logging]
 log_level = "INFO"
