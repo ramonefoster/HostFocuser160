@@ -309,6 +309,9 @@ class App():
         # if self._is_moving and self._homing:
         #     self.status["clientId"] = 0
 
+    def reply(self, msg):
+        self.replier.send_string(msg)
+
     def run(self):
         """Main Loop"""
         self._client_id = 0
@@ -336,6 +339,7 @@ class App():
                             self._client_id = msg_rep.get("clientId") 
                     except Exception as e:
                         print(e)
+                        self.reply('NAK')
                     try:
                         # Handle all possible commands
                         self.status["error"] = ""
@@ -347,25 +351,35 @@ class App():
                             'STATUS': self.pub_status,
                         }
 
+                        command_processed = False
+
                         if "MOVE=" in cmd and self.busy_id == 0:
                             self.handle_move(cmd[5:], Config.max_speed)
-                            self.replier.send_string('ACK')
-                        
+                            self.reply('ACK')
+                            command_processed = True
+
                         if "FOCUSIN" in cmd and self.busy_id == 0:
                             self.handle_in_out(1, cmd[8:])
-                            self.replier.send_string('ACK')
-                        
+                            self.reply('ACK')
+                            command_processed = True
+
                         if "FOCUSOUT" in cmd and self.busy_id == 0:
                             self.handle_in_out(0, cmd[9:])
-                            self.replier.send_string('ACK')
-                        
+                            self.reply('ACK')
+                            command_processed = True
+
                         if "HALT" in cmd and (self._client_id == self.busy_id or self.busy_id == 0):
                             self.handle_halt()
-                            self.replier.send_string('ACK')
+                            self.reply('ACK')
+                            command_processed = True
 
                         if cmd in command_handlers and self.busy_id == 0:
                             command_handlers[cmd]()
-                            self.replier.send_string('ACK')
+                            self.reply('ACK')
+                            command_processed = True
+
+                        if not command_processed:
+                            self.reply('NAK')
 
                         self.status["connected"] = self.device.connected
 
