@@ -7,15 +7,10 @@
 
 from logging import Logger
 
-from threading import Thread
-from threading import Lock
-from threading import Timer
-
 import time
 import zmq
 import json
 import socket
-import os
 from datetime import datetime
 
 from src.core.config import Config
@@ -26,7 +21,7 @@ class App():
     def __init__(self, logger: Logger):
 
         self.logger = logger
-        self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
+        self.config_file = r"src/config/config.toml"
 
         # Network Settings
         self.context = None

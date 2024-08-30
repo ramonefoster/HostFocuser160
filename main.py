@@ -11,7 +11,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QMessageBox, QMenu, QSystemTrayIcon, QAction
 
 import sys
-import time
 import os
 from threading import Thread
 from src.core.log import init_logging
@@ -53,8 +52,8 @@ class FocuserOPD(QtWidgets.QMainWindow):
             
         self.control = App(logger)
 
-        self.config_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/config.toml")
-        self.log_file = os.path.join(os.path.expanduser("~"), "Documents/Focuser160/focuser.log")
+        self.config_file = r"src/config/config.toml"
+        self.log_file = r"logs/focuser.log"
 
         main_window_geometry = self.geometry()  # Get the geometry of the main window
 

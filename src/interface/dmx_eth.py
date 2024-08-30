@@ -6,11 +6,7 @@ from threading import Timer
 from src.core.config import Config
 
 import socket
-import select
 import time
-
-from scipy.interpolate import interp1d
-import numpy as np
 
 class FocuserDriver():
     def __init__(self, logger: Logger):  
@@ -48,14 +44,6 @@ class FocuserDriver():
 
         self._timer: Timer = None
         self._interval: float = .15
-
-        self._model_step = np.array([0, 1000, 1500, 2500, 4000, 5900, 8500, 
-                                     12000, 15000, 18000, 22000, 27000, 32000, 
-                                     38000, 45000, 55000, 65000, 75000, 84000])
-        self._model_microns = np.array([0, 3, 18, 46, 52, 109, 146, 204, 
-                                        149, 289, 377, 447, 539, 631, 736, 
-                                        908, 1064, 1233, 1333])
-        self._interp_func = interp1d(self._model_step, self._model_microns, kind='linear')
 
     @property
     def connected(self):
@@ -157,14 +145,7 @@ class FocuserDriver():
         try:
             self._lock.acquire()
             step = int(self._write("EX", max_retries=5)) 
-            # if step >= 0:
-            #     conv_position = int(self._interp_func(step))
-            # elif step < 0:
-            #     conv_position = round(step*0.0162)
-            #     self._homing = True
-            # else:
-            #     return self._last_pos
-            # self._position = conv_position
+            
             self._position = int(round(step/Config.enc_2_microns))
             self._last_pos = self._position
             self._lock.release()

@@ -19,23 +19,7 @@ def init_logging():
     if not CONFIG_FILE:
         return
     
-    """ Create customized logger """
-    docs_folder = os.path.join(os.path.expanduser("~"), "Documents")
-
-    new_folder_path = os.path.join(docs_folder, "Focuser160")
-    log_path = os.path.join(new_folder_path, "focuser.log")
-    
-    if not os.path.exists(log_path):
-        if not os.path.exists(new_folder_path):
-            os.makedirs(new_folder_path)
-        # If the file doesn't exist, create it        
-        try:
-            # You can create an empty file using open() in 'w' mode
-            with open(log_path, 'a') as file:
-                # This will create an empty file if it doesn't exist
-                print("Log file didn't exist but was CREATED with success")
-        except IOError as e:
-            print(f"Error creating the file: {e}")    
+    log_path = r"logs/focuser.log"
 
     logging.basicConfig(level=Config.log_level)
     logger = logging.getLogger()                # Root logger, see above
