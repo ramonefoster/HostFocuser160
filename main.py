@@ -221,6 +221,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
                 self.statRouter.setStyleSheet("background-color: indianred; border-radius: 10px;")
                 self.lineSR.setStyleSheet("background-color: indianred; border-radius: 10px;")
             else:
+                self.statRouter.setStyleSheet("background-color: green; border-radius: 10px;")
                 self.lblPing.setText("Device is NOT Reachable")
         
     def update(self):   
