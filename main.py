@@ -130,6 +130,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         self.run_thread = None
         self.statusBar().showMessage("Ready")
 
+        self.cooldown = time.time()
         self.ping()
         if Config.startup:
             self.start()
@@ -205,6 +206,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
            
     def ping(self):
         """Checks if device is reachable"""
+        self.cooldown = time.time()
         if self.control.reachable:
             self.lblPing.setText("Device is Reachable")
             self.reachable = True
@@ -222,6 +224,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
                 self.lineSR.setStyleSheet("background-color: indianred; border-radius: 10px;")
             else:
                 self.statRouter.setStyleSheet("background-color: green; border-radius: 10px;")
+                self.lineSR.setStyleSheet("background-color: green; border-radius: 10px;")
                 self.lblPing.setText("Device is NOT Reachable")
         
     def update(self):   
@@ -260,7 +263,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
         
         #updates UI Stats every 15sec
-        if time.time() % 15 == 0:
+        if int(time.time() - self.cooldown) > 10:
             self.ping()
     
     def closeEvent(self, event):
