@@ -89,8 +89,10 @@ class App():
         for _try in range(5):
             self.reachable = self.ping_server()            
             if self.reachable:
+                self.router = True
                 break
             _try += 1
+            self.router = self.ping_router()
         
         if self.reachable:
             try:
@@ -194,6 +196,20 @@ class App():
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(.6)
             s.connect((Config.device_ip, Config.device_port))
+            s.close()
+            time.sleep(.1)
+            return True
+        except Exception as e:
+            return False 
+
+    def ping_router(self):
+        """Check if router is reachable
+        ::returns:: bool
+        """
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(.6)
+            s.connect((Config.router_ip, 80))
             s.close()
             time.sleep(.1)
             return True
@@ -327,7 +343,7 @@ class App():
         while not self.stop_var:
             t0 = time.time()
             current_time = datetime.now()
-            if -15 >= (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) >= 15:  
+            if -1 >= (current_time.second - self.last_pub.second) or (current_time.second - self.last_pub.second) >= 1:  
                 self.device.position              
                 self.pub_status()
                 self.last_pub = current_time                
