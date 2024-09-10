@@ -36,6 +36,7 @@ class Config:
     # --------------
     device_name: str = get_toml('Device', 'device_name')
     device_ip: str = get_toml('Device', 'device_ip')
+    router_ip: str = get_toml('Device', 'router_ip')
     device_port: int = get_toml('Device', 'device_port')
     absolute: bool = get_toml('Device', 'absolute')
     max_step: int = get_toml('Device', 'max_step')

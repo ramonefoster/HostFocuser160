@@ -14,6 +14,7 @@ import sys
 import os
 from threading import Thread
 from src.core.log import init_logging
+import time
 
 try:
     from src.core.config import Config    
@@ -129,6 +130,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
         self.run_thread = None
         self.statusBar().showMessage("Ready")
 
+        self.cooldown = time.time()
         self.ping()
         if Config.startup:
             self.start()
@@ -204,12 +206,26 @@ class FocuserOPD(QtWidgets.QMainWindow):
            
     def ping(self):
         """Checks if device is reachable"""
+        self.cooldown = time.time()
         if self.control.reachable:
             self.lblPing.setText("Device is Reachable")
             self.reachable = True
+            self.statMotor.setStyleSheet("background-color: green; border-radius: 10px;")
+            self.statRouter.setStyleSheet("background-color: green; border-radius: 10px;")
+            self.lineSR.setStyleSheet("background-color: green; border-radius: 10px;")
+            self.lineRM.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
-            self.lblPing.setText("Device is NOT Reachable")
+            self.statMotor.setStyleSheet("background-color: indianred; border-radius: 10px;")
+            self.lineRM.setStyleSheet("background-color: indianred; border-radius: 10px;")
             self.reachable = False
+            if not self.control.router:
+                self.lblPing.setText("Router is NOT Reachable")
+                self.statRouter.setStyleSheet("background-color: indianred; border-radius: 10px;")
+                self.lineSR.setStyleSheet("background-color: indianred; border-radius: 10px;")
+            else:
+                self.statRouter.setStyleSheet("background-color: green; border-radius: 10px;")
+                self.lineSR.setStyleSheet("background-color: green; border-radius: 10px;")
+                self.lblPing.setText("Device is NOT Reachable")
         
     def update(self):   
         """Main loop and UI manager"""     
@@ -218,8 +234,10 @@ class FocuserOPD(QtWidgets.QMainWindow):
         
         if self.run_thread and self.run_thread.is_alive():
             self.statusBar().setStyleSheet("background-color: green")
+            self.statServer.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
             self.statusBar().setStyleSheet("background-color: indianred")
+            self.statServer.setStyleSheet("background-color: indianred; border-radius: 10px;")
         if con:
             self.statusBar().showMessage("Device Socket Connected")
             if not self.reachable:
@@ -243,6 +261,10 @@ class FocuserOPD(QtWidgets.QMainWindow):
             self.lblMov.setStyleSheet("background-color: green; border-radius: 10px;")
         else:
             self.lblMov.setStyleSheet("background-color: rgb(119, 118, 123); border-radius: 10px;")
+        
+        #updates UI Stats every 15sec
+        if int(time.time() - self.cooldown) > 10:
+            self.ping()
     
     def closeEvent(self, event):
         """Close application"""
