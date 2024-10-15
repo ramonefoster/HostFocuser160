@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /focuser160/
 
 # Set the command to run your application
-CMD ["python", "main.py"]
+CMD ["python", "mainNoGui.py"]
