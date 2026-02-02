@@ -16,12 +16,21 @@ from datetime import datetime
 from src.core.config import Config
 
 from src.interface.dmx_eth import FocuserDriver as Focuser
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+config_path = resource_path('config/config.toml')
 
 class App():
     def __init__(self, logger: Logger):
 
         self.logger = logger
-        self.config_file = r"src/config/config.toml"
+        self.config_file = config_path
 
         # Network Settings
         self.context = None

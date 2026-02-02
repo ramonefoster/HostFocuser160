@@ -5,10 +5,16 @@
 #
 # Python Compatibility: Requires Python 3.10 or later
 
-import os
+from pathlib import Path
 import toml
+import sys
 
-config_file = "src/config/config.toml"
+def resource_path(relative_path: str) -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+    return Path(relative_path)
+
+config_file = resource_path('config/config.toml')
 
 _dict = {}
 _dict = toml.load(config_file)

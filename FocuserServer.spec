@@ -1,11 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 added_files = [
-("assets", "assets")
+("assets", "assets"),
+("config", "config")
 ]
 
 a = Analysis(
-    ['C:/Users/servidorOPD/Documents/Programas/HostControllerF160/main.py'],
+    ['C:/Users/ramon/OneDrive/Área de Trabalho/HostFocuser160/main.py'],
     pathex=[],
     binaries=[],
     datas=added_files,

@@ -36,6 +36,7 @@ def resource_path(relative_path):
 
 main_ui_path = resource_path('assets/main.ui')
 icon_tray = resource_path('assets/icon.png')
+config_path = resource_path('config/config.toml')
 
 class FocuserOPD(QtWidgets.QMainWindow):
     def __init__(self):
@@ -53,7 +54,7 @@ class FocuserOPD(QtWidgets.QMainWindow):
             
         self.control = App(logger)
 
-        self.config_file = r"src/config/config.toml"
+        self.config_file = config_path
         self.log_file = r"logs/focuser.log"
 
         main_window_geometry = self.geometry()  # Get the geometry of the main window

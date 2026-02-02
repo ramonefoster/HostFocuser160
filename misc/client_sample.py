@@ -7,15 +7,15 @@ from src.core.config import Config
 import zmq
 import sys
 import json
-import os
 import time
+from pathlib import Path
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+def resource_path(relative_path: str) -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+    return Path(relative_path)
 
-main_ui_path = resource_path('../assets/client.ui')
+main_ui_path = resource_path('assets/client.ui')
 
 class ClientSimulator(QtWidgets.QMainWindow):
     def __init__(self):
@@ -72,7 +72,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
 
     def start_client(self):
         self.subscriber = self.context.socket(zmq.SUB)
-        self.subscriber.connect(f"tcp://{Config.ip_address}:{Config.port_pub}")
+        self.subscriber.connect(f"tcp://localhost:{Config.port_pub}")
         topics_to_subscribe = ''
 
         self.subscriber.setsockopt_string(zmq.SUBSCRIBE, topics_to_subscribe)
@@ -81,7 +81,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.poller.register(self.subscriber, zmq.POLLIN)
 
         self.req = self.context.socket(zmq.REQ)
-        self.req.connect(f"tcp://{Config.ip_address}:{Config.port_rep}")
+        self.req.connect(f"tcp://localhost:{Config.port_rep}")
     
     def send_request(self, action, timeout=1000):
         self._msg_json["action"] = action
