@@ -5,10 +5,16 @@
 #
 # Python Compatibility: Requires Python 3.10 or later
 
-import os
+from pathlib import Path
 import toml
+import sys
 
-config_file = "src/config/config.toml"
+def resource_path(relative_path: str) -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+    return Path(relative_path)
+
+config_file = resource_path('config/config.toml')
 
 _dict = {}
 _dict = toml.load(config_file)
@@ -30,7 +36,7 @@ class Config:
     # ---------------
     ip_address: str = get_toml('Network', 'ip_address')
     port_pub: int = get_toml('Network', 'port_pub')
-    port_pull: int = get_toml('Network', 'port_pull')
+    port_rep: int = get_toml('Network', 'port_rep')
     # --------------
     # Device Section
     # --------------

@@ -7,15 +7,15 @@ from src.core.config import Config
 import zmq
 import sys
 import json
-import os
 import time
+from pathlib import Path
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+def resource_path(relative_path: str) -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+    return Path(relative_path)
 
-main_ui_path = resource_path('../assets/client.ui')
+main_ui_path = resource_path('assets/client.ui')
 
 class ClientSimulator(QtWidgets.QMainWindow):
     def __init__(self):
@@ -34,7 +34,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
 
         self.context = zmq.Context()       
 
-        self.BarFocuser.setStyleSheet("QProgressBar::chunk ""{"'background-color: rgb(26, 26, 26)'"} QProgressBar { color: indianred; }")
+        self.BarFocuser.setStyleSheet("QProgressBar::chunk { background-color: rgb(26, 26, 26) } QProgressBar { color: indianred; }")
         self.BarFocuser.setTextDirection(0) 
 
         self.previous_is_mov = None
@@ -52,7 +52,7 @@ class ClientSimulator(QtWidgets.QMainWindow):
             "clientTransactionId": 0,
             "clientName": "Simulator",
             "action": "STATUS"
-            }
+        }
 
         self.start_client()
         self.txtStatus.setText(f"{Config.ip_address}")
@@ -65,14 +65,14 @@ class ClientSimulator(QtWidgets.QMainWindow):
         try:
             self.ip_addr = Config.ip_address  
             self.port_pub = Config.port_pub  
-            self.port_pull = Config.port_pull 
+            self.port_req = Config.port_rep
             return True
         except:
             return False
 
     def start_client(self):
         self.subscriber = self.context.socket(zmq.SUB)
-        self.subscriber.connect(f"tcp://{Config.ip_address}:{Config.port_pub}")
+        self.subscriber.connect(f"tcp://localhost:{Config.port_pub}")
         topics_to_subscribe = ''
 
         self.subscriber.setsockopt_string(zmq.SUBSCRIBE, topics_to_subscribe)
@@ -80,47 +80,74 @@ class ClientSimulator(QtWidgets.QMainWindow):
         self.poller = zmq.Poller()
         self.poller.register(self.subscriber, zmq.POLLIN)
 
-        self.pusher = self.context.socket(zmq.PUSH)
-        self.pusher.connect(f"tcp://{Config.ip_address}:{Config.port_pull}")
+        self.req = self.context.socket(zmq.REQ)
+        self.req.connect(f"tcp://localhost:{Config.port_rep}")
+    
+    def send_request(self, action, timeout=1000):
+        self._msg_json["action"] = action
+        self.req.send_string(json.dumps(self._msg_json))
+
+        poller = zmq.Poller()
+        poller.register(self.req, zmq.POLLIN)
+
+        socks = dict(poller.poll(timeout))  # Timeout in milliseconds
+        if socks.get(self.req) == zmq.POLLIN:
+            try:
+                response = self.req.recv_string()
+                return response
+            except Exception as e:
+                print(f"Error receiving response: {e}")
+                return None
+        else:
+            print(f"No response received within {timeout} milliseconds.")
+            return None
     
     def connect(self):
-        self._msg_json["action"] = "CONNECT"
-        self.pusher.send_string(json.dumps(self._msg_json))
-    
+        response = self.send_request("CONNECT")
+        if response:
+            self.txtStatus.setText(response)
+
     def home(self):
-        self._msg_json["action"] = "HOME"
-        self.pusher.send_string(json.dumps(self._msg_json))
-    
+        response = self.send_request("HOME")
+        if response:
+            self.txtStatus.setText(response)
+
     def disconnect(self):
-        self._msg_json["action"] = "DISCONNECT"
-        self.pusher.send_string(json.dumps(self._msg_json))
-    
+        response = self.send_request("DISCONNECT")
+        if response:
+            self.txtStatus.setText(response)
+
     def halt(self):
-        self._msg_json["action"] = "HALT"
-        self.pusher.send_string(json.dumps(self._msg_json))
+        response = self.send_request("HALT")
+        if response:
+            self.txtStatus.setText(response)
 
     def move_to(self):
         if not self.is_moving:
             pos = self.txtMov.text()
-            self._msg_json["action"] = F"MOVE={pos}"
-            self.pusher.send_string(json.dumps(self._msg_json))
-    
+            response = self.send_request(f"MOVE={pos}")
+            if response:
+                self.txtStatus.setText(response)
+
     def move_in(self):
         if not self.is_moving:
-            self._msg_json["action"] = F"FOCUSIN=200"
-            self.pusher.send_string(json.dumps(self._msg_json))
-    
+            response = self.send_request("FOCUSIN=200")
+            if response:
+                self.txtStatus.setText(response)
+
     def move_out(self):
         if not self.is_moving:
-            self._msg_json["action"] = F"FOCUSOUT=200"
-            self.pusher.send_string(json.dumps(self._msg_json))
-    
+            response = self.send_request("FOCUSOUT=200")
+            if response:
+                self.txtStatus.setText(response)
+
     def get_status(self):
-        self._msg_json["action"] = "STATUS"
-        self.pusher.send_string(json.dumps(self._msg_json))
-    
+        response = self.send_request("STATUS")
+        if response:
+            self.txtStatus.setText(response)
+
     def update(self):
-        if round(time.time()%35) == 0:
+        if round(time.time() % 35) == 0:
             self.get_status()
         self.socks = dict(self.poller.poll(100))
         if self.socks.get(self.subscriber) == zmq.POLLIN:
